@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00FFFF">
+    <title>Aura Player - Infinite Cinema (V3.1)</title>
+    <style>
+        /* Base Reset & Variables */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --bg-dark: #0a0a0c;
+            --neon-accent: red;
+            --neon-alt: blue;
+            --neon-glow: 0 0 15px rgba(255, 42, 9, 0.6), 0 0 30px rgba(255, 42, 95, 0.4);
+            --party-glow: 0 0 15px rgba(0, 243, 255, 0.8), 0 0 40px rgba(0, 243, 255, 0.6);
+            --text-main: #ffffff;
+            --text-muted: #666;
+            --rainbow-speed: 8s;
+            --party-border-color: #00f3ff;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            padding-bottom: 160px;
+        }
+        body.theme-dark { --bg-dark: #0a0a0c; --text-main: #ffffff; --neon-accent: #ff2a5f; --neon-alt: #00f3ff; }
+        body.theme-light { --bg-dark: #f0f0f5; --text-main: #111; --neon-accent: #ff2a5f; --neon-alt: #007bff; }
+        body.theme-green { --bg-dark: #031005; --text-main: #aaffaa; --neon-accent: #00ff00; --neon-alt: #00ffcc; }
+        body.theme-purple { --bg-dark: #10031a; --text-main: #dbbaff; --neon-accent: #a855f7; --neon-alt: #d946ef; }
+
+        /* SETTINGS DASHBOARD */
+        #settings-dashboard {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 8, 0.97); backdrop-filter: blur(20px);
+            z-index: 200; transform: translateX(-100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; padding: 20px; overflow-y: auto;
+            border-right: 2px solid var(--neon-accent);
+        }
+        #settings-dashboard.open { transform: translateX(0); }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
+        .settings-header h2 { color: var(--neon-accent); text-transform: uppercase; letter-spacing: 2px; }
+        .settings-close { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .settings-section { margin-bottom: 30px; }
+        .settings-section h3 { color: var(--text-muted); margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase; }
+        .setting-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+        .setting-opt { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .setting-opt:hover, .setting-opt.active { border-color: var(--neon-accent); box-shadow: var(--neon-glow); }
+
+        /* Equalizer */
+        #eq-container { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-top: 10px; }
+        .eq-band { display: flex; align-items: center; gap: 10px; }
+        .eq-band label { width: 50px; font-size: 0.7rem; color: #ccc; text-align: right; }
+        .eq-band input[type="range"] { flex: 1; height: 4px; accent-color: var(--neon-accent); cursor: pointer; }
+        .eq-band span { width: 30px; font-size: 0.7rem; color: var(--neon-accent); }
+
+        /* Notification Bar */
+        #notif-bar {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 10, 12, 0.9); border: 1px solid var(--neon-accent);
+            padding: 10px 20px; border-radius: 30px; box-shadow: var(--neon-glow);
+            z-index: 150; display: none; backdrop-filter: blur(5px);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        body.party-active #notif-bar { border-color: var(--party-border-color); box-shadow: var(--party-glow); }
+
+        /* Limits */
+        .shelf-limit-warning { width: 100%; text-align: center; padding: 20px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); margin-top: 10px; }
+        .shelf-limit-warning a { color: var(--neon-accent); cursor: pointer; text-decoration: underline; font-weight: bold; }
+
+        /* AI & Playlists */
+        .ai-mix-card { background: linear-gradient(135deg, #1a0030, #4d001f) !important; border-color: var(--neon-alt) !important; }
+        .playlist-card { position: relative; overflow: hidden; height: 150px; width: 150px; flex-shrink: 0; }
+        .playlist-card img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.6; z-index: 1; }
+        .playlist-card .content { position: relative; z-index: 2; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); }
+
+        /* Flow Chart */
+        #flow-chart-container { width: 100%; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; overflow-x: auto; }
+        .flow-chart-layout { display: flex; align-items: flex-end; gap: 8px; height: 100px; min-width: 300px; }
+        .flow-bar { width: 15px; background: var(--neon-accent); border-radius: 3px 3px 0 0; transition: height 0.5s; box-shadow: var(--neon-glow); }
+        .flow-label { font-size: 0.6rem; text-align: center; color: var(--text-muted); width: 15px; transform: rotate(-90deg) translateY(10px); margin-top: 15px; }
+
+        /* Music Jump */
+        #musicJumpBtn { border-color: var(--neon-alt) !important; color: var(--neon-alt) !important; position: relative; }
+        .coming-soon-tooltip { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); background: #000; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 0.6rem; white-space: nowrap; opacity: 0; pointer-events: none; transition: 0.3s; }
+        #musicJumpBtn:hover .coming-soon-tooltip { opacity: 1; }
+
+        /* Party Mode */
+        @keyframes partyShake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+        body.party-active .tv-display { animation: partyShake 0.15s infinite; border-bottom-color: var(--party-border-color) !important; border-top-color: var(--party-border-color) !important; border-top: 2px solid; }
+        body.party-active .party-border-glow { animation: borderGlow 2s infinite alternate; }
+        @keyframes borderGlow { 0% { border-color: rgba(0, 243, 255, 0.2); box-shadow: 0 0 5px rgba(0, 243, 255, 0.2); } 100% { border-color: rgba(0, 243, 255, 1); box-shadow: 0 0 30px rgba(0, 243, 255, 0.8); } }
+        @keyframes ghostRadiation { 0% { opacity: 0.1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.1); } 100% { opacity: 0.1; transform: scale(1); } }
+        .party-ghost-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(0, 243, 255, 0.3) 0%, transparent 70%); pointer-events: none; z-index: 0; display: none; animation: ghostRadiation 3s infinite; }
+        body.party-active .party-ghost-overlay { display: block; }
+
+        /* Live Sound Waves */
+        #tv-live-wave { position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; pointer-events: none; z-index: 4; display: none; opacity: 0.8; }
+        body.party-active #tv-live-wave { display: block; height: 180px; }
+        #tv-live-wave.active { display: block; }
+
+        /* Search Bar */
+        .search-rainbow-container { width: 90%; max-width: 600px; margin: 15px auto 10px auto; position: relative; border-radius: 25px; padding: 2.5px; background: linear-gradient(90deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000); background-size: 400% 400%; animation: rainbow-shift var(--rainbow-speed) linear infinite; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4), 0 0 30px rgba(0, 0, 255, 0.3); z-index: 10; }
+        @keyframes rainbow-shift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .search-rainbow-container input { width: 100%; height: 40px; border: none; outline: none; background: #0c0c10; color: #ffffff; border-radius: 23px; padding: 0 20px; font-size: 0.9rem; font-weight: 500; text-align: center; }
+
+        /* TV Display */
+        .tv-display { position: relative; height: 35vh; width: 100%; border-bottom: 2px solid var(--neon-accent); box-shadow: 0 10px 30px rgba(255, 42, 95, 0.2); overflow: hidden; display: flex; justify-content: center; align-items: center; background: #000; }
+        .party-border-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid transparent; pointer-events: none; z-index: 6; box-sizing: border-box; }
+        .dynamic-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(-45deg, #1b0210, #4d001f, #ff2a5f, #1a0030); background-size: 400% 400%; animation: gradientShift 12s ease infinite; z-index: 1; opacity: 0.45; }
+        .tv-video-source { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 2; display: none; opacity: 0.8; }
+        .tv-scroll-box { position: relative; z-index: 5; width: 90%; max-width: 600px; height: 90%; overflow-y: auto; background: rgba(10, 10, 12, 0.65); backdrop-filter: blur(12px); border-radius: 15px; border: 1px solid rgba(255, 42, 95, 0.3); padding: 15px 25px; display: flex; flex-direction: column; align-items: center; }
+        .album-art { width: 140px; height: 140px; background: #111; border-radius: 12px; box-shadow: var(--neon-glow); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; color: var(--neon-accent); text-align: center; margin-bottom: 15px; flex-shrink: 0; transition: transform 0.3s ease; overflow: hidden; }
+        .track-info { text-align: center; margin-bottom: 15px; }
+        .track-info h2 { font-size: 1.5rem; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); margin-bottom: 3px; }
+        .track-info h3 { font-size: 1.1rem; color: var(--neon-accent); margin-bottom: 3px; }
+        .track-info h4 { font-size: 0.9rem; color: var(--text-muted); font-weight: normal; }
+        .tv-controls { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+        .action-btn { background: transparent; color: var(--text-main); border: 2px solid var(--neon-accent); padding: 8px 18px; font-size: 0.8rem; font-weight: bold; border-radius: 30px; cursor: pointer; box-shadow: var(--neon-glow); transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Shelves */
+        .shelves-container { flex: 1; padding: 20px; overflow-y: auto; margin-bottom: 20px; }
+        .shelf { margin-bottom: 40px; }
+        .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .shelf-header h2 { font-size: 1.1rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; border-left: 3px solid var(--neon-accent); padding-left: 10px; }
+        .goto-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+        .goto-btn:hover { background: var(--neon-accent); border-color: var(--neon-accent); box-shadow: var(--neon-glow); }
+
+        .item-card { background: #121216; border-radius: 8px; padding: 12px; cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.03); transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        .item-card:hover { border-color: var(--neon-accent); transform: translateY(-3px); box-shadow: var(--neon-glow); }
+        .item-card.active { border-color: var(--neon-accent); background: rgba(255, 0, 0, 0.08); box-shadow: var(--neon-glow); }
+        .layout-scroll { display: flex; overflow-x: auto; gap: 15px; padding-bottom: 12px; scroll-behavior: smooth; }
+        .layout-scroll .item-card { flex: 0 0 auto; width: 150px; height: 150px; display: flex; align-items: flex-end; }
+
+        /* Volume Bar */
+        #volume-bar-container {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            border-top: 2px solid var(--neon-accent);
+            padding: 10px 20px;
+            display: flex; align-items: center; gap: 15px;
+            z-index: 110;
+        }
+        .volume-slider { flex: 1; height: 6px; -webkit-appearance: none; background: linear-gradient(90deg, var(--neon-accent), var(--neon-alt)); border-radius: 3px; outline: none; }
+        .volume-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px var(--neon-accent); cursor: pointer; }
+        #volume-percent { font-size: 0.8rem; color: var(--text-muted); min-width: 40px; text-align: right; }
+
+        /* See All Modal */
+        .see-all-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(15px);
+            z-index: 250; display: none; flex-direction: column; padding: 20px;
+            border: 2px solid var(--neon-accent); box-sizing: border-box;
+        }
+        .see-all-modal.open { display: flex; }
+        .see-all-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .see-all-header h2 { color: var(--neon-accent); }
+        .see-all-close { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .see-all-content { overflow-y: auto; flex: 1; display: flex; flex-wrap: wrap; gap: 15px; padding: 10px; }
+        .see-all-item { background: #141418; border-radius: 8px; padding: 10px; width: 160px; text-align: center; cursor: pointer; transition: transform 0.2s; }
+        .see-all-item:hover { transform: scale(1.05); border: 1px solid var(--neon-accent); }
+        .see-all-item img { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; margin-bottom: 8px; }
+        .see-all-item .title { font-size: 0.85rem; font-weight: bold; }
+
+        /* Game Modal */
+        #game-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 300; display: none; justify-content: center; align-items: center; flex-direction: column; }
+        #game-modal.open { display: flex; }
+        #game-modal .game-modal-content { background: #111; padding: 20px; border-radius: 20px; border: 2px solid var(--neon-alt); box-shadow: 0 0 40px rgba(0, 243, 255, 0.4); width: 90%; max-width: 400px; text-align: center; }
+        #game-canvas { width: 100%; height: 250px; background: #0a0a0f; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; display: block; }
+        #game-score { font-size: 1.2rem; color: var(--neon-alt); font-weight: bold; margin-bottom: 10px; }
+        .game-controls { display: flex; gap: 10px; justify-content: center; }
+        .game-btn { background: var(--neon-accent); border: none; padding: 8px 20px; color: #000; font-weight: bold; border-radius: 20px; cursor: pointer; }
+        .game-btn.close { background: #333; color: #fff; }
+
+        /* Info Modal */
+        #info-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10,10,12,0.95); border: 2px solid var(--neon-alt); border-radius: 15px; padding: 20px; z-index: 400; display: none; max-width: 350px; text-align: center; box-shadow: 0 0 30px rgba(0,243,255,0.4); }
+        #info-modal.open { display: block; }
+
+        .fresh-handle-footer { position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; color: var(--neon-alt); text-transform: uppercase; animation: pulse-handle 2s infinite alternate ease-in-out; text-shadow: 0 0 5px rgba(0, 243, 255, 0.4); pointer-events: none; }
+        @keyframes pulse-handle { 0% { transform: translateX(-50%) scale(1); opacity: 0.55; text-shadow: 0 0 3px var(--neon-alt); } 100% { transform: translateX(-50%) scale(1.06); opacity: 1; text-shadow: 0 0 10px var(--neon-alt); } }
+
+        #playlist-cover-input { display: none; }
+        .custom-file-upload { border: 1px solid var(--neon-accent); padding: 5px 10px; cursor: pointer; border-radius: 5px; display: inline-block; font-size: 0.8rem; }
+
+        /* Dashboard */
+        .bottom-control-dashboard {
+            position: fixed; bottom: 60px; left: 0; width: 100%; height: 90px;
+            background: rgba(10, 10, 12, 0.96); backdrop-filter: blur(15px);
+            border-top: 2px solid var(--neon-accent);
+            box-shadow: 0 -5px 25px rgba(255, 42, 95, 0.25);
+            z-index: 100; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        body.party-active .bottom-control-dashboard { border-top-color: var(--party-border-color); box-shadow: 0 -5px 25px rgba(0, 243, 255, 0.35); }
+        .dash-progress-wrapper { width: 100%; height: 5px; background: rgba(255, 255, 255, 0.08); cursor: pointer; position: relative; }
+        .dash-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-accent) 0%, var(--neon-alt) 100%); box-shadow: 0 0 10px var(--neon-accent); }
+        .dash-inner-controls { flex: 1; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; gap: 15px; }
+        .dash-media-meta { display: flex; align-items: center; gap: 12px; width: 25%; min-width: 180px; }
+        .dash-album-art { width: 44px; height: 44px; border-radius: 6px; background: linear-gradient(135deg, var(--neon-accent) 0%, var(--neon-alt) 100%); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; font-size: 0.95rem; overflow: hidden; box-shadow: var(--neon-glow); }
+        .dash-song-details { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .dash-song-title { font-size: 0.9rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dash-song-artist { font-size: 0.75rem; color: var(--neon-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dash-song-album { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dash-center-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .dash-btn { background: none; border: none; color: var(--text-main); cursor: pointer; outline: none; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .dash-btn.sec-btn { font-size: 1.2rem; color: rgba(255, 255, 255, 0.6); width: 36px; height: 36px; border-radius: 50%; }
+        .dash-btn.sec-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+        .dash-btn.sec-btn.active { color: var(--neon-alt); text-shadow: 0 0 8px var(--neon-alt); }
+        .dash-btn.main-btn { width: 48px; height: 48px; border-radius: 50%; background: #fff; color: #000; font-size: 1.3rem; box-shadow: 0 4px 12px rgba(255, 255, 255, 0.25); }
+
+        @media (max-width: 700px) {
+            .dash-media-meta { width: 20%; min-width: 120px; }
+            .dash-center-row { gap: 8px; }
+            .dash-btn.sec-btn { font-size: 1rem; width: 32px; height: 32px; }
+            .dash-btn.main-btn { width: 40px; height: 40px; }
+            .dash-inner-controls { padding: 0 10px; gap: 8px; }
+        }
+    </style>
+</head>
+<body> 
+
+    <!-- SETTINGS DASHBOARD -->
+    <div id="settings-dashboard">
+        <div class="settings-header">
+            <h2>⚙️ System Control</h2>
+            <button class="settings-close" onclick="toggleSettings()">✕</button>
+        </div>
+        <div class="settings-section">
+            <h3>THEME ENGINE</h3>
+            <div class="setting-card-grid">
+                <div class="setting-opt active" onclick="setGlobalTheme('theme-dark', this)">Neon Dark</div>
+                <div class="setting-opt" onclick="setGlobalTheme('theme-light', this)">Cyber Light</div>
+                <div class="setting-opt" onclick="setGlobalTheme('theme-green', this)">Matrix Code</div>
+                <div class="setting-opt" onclick="setGlobalTheme('theme-purple', this)">Galaxy Void</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>EQUALIZER</h3>
+            <div id="eq-container"></div>
+        </div>
+        <div class="settings-section">
+            <h3>MODES</h3>
+            <div class="setting-card-grid">
+                <div class="setting-opt" onclick="togglePartyMode()">🎉 Party Mode</div>
+                <div class="setting-opt" onclick="window.location.href='music.html'">🎮 Music Jump</div>
+                <div class="setting-opt" onclick="showNotif('support@aura.io')">📡 Contact</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>PHONE STORAGE</h3>
+            <div class="setting-card-grid">
+                <div class="setting-opt" onclick="scanMobileStorage()">📂 Scan Phone Storage</div>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>PLAYLIST CREATOR</h3>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <input type="text" id="new-playlist-name" placeholder="Playlist Name" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px; border-radius:4px;">
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <span class="custom-file-upload" onclick="document.getElementById('playlist-cover-input').click()">+ Upload Cover</span>
+                    <span id="cover-filename" style="font-size:0.7rem; color:var(--text-muted);">No file chosen</span>
+                </div>
+                <button onclick="createNewPlaylist()" style="background:var(--neon-accent); border:none; padding:8px; border-radius:4px; color:#fff; font-weight:bold; cursor:pointer;">Create Playlist</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>FLOW CHART</h3>
+            <div id="flow-chart-container"><div class="flow-chart-layout" id="flow-chart-layout"></div></div>
+        </div>
+    </div>
+
+    <input type="file" id="playlist-cover-input" accept="image/*" onchange="handleCoverUpload(event)">
+    <div id="notif-bar"></div>
+    <div class="party-ghost-overlay"></div>
+
+    <div class="search-rainbow-container">
+        <input type="text" id="rainbow-search" placeholder="🔍 Search music..." oninput="handleGlobalSearch(this.value)">
+    </div>
+
+    <div class="tv-display">
+        <div class="party-ghost-overlay"></div>
+        <div class="party-border-glow"></div>
+        <canvas id="tv-live-wave"></canvas>
+        <div class="dynamic-bg"></div>
+        <video class="tv-video-source" id="tv-video" loop playsinline muted></video>
+        <div class="tv-scroll-box">
+            <div class="album-art" id="currentAlbum">[ ALBUM ART ]</div>
+            <div class="track-info">
+                <h2 id="nowPlayingSong">Aura Introduction</h2>
+                <h3 id="nowPlayingArtist">Unknown Artist</h3>
+                <h4 id="nowPlayingAlbum">System Library</h4>
+            </div>
+            <div class="tv-controls">
+                <button class="action-btn" onclick="activateShuffle()">⤨ Shuffle</button>
+                <button class="action-btn" onclick="scanMobileStorage()">📂 Load Music</button>
+                <button class="action-btn" id="musicJumpBtn" onclick="window.location.href='music.html'">🎮 Music Jump</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="shelves-container">
+        <div class="shelf">
+            <div class="shelf-header"><h2>Trending Videos</h2><button class="goto-btn" onclick="openSeeAll('videos')">ENDLESS STREAM</button></div>
+            <div class="layout-scroll" id="videoShelf" onscroll="checkEndlessScroll(this)"></div>
+        </div>
+        <div class="shelf">
+            <div class="shelf-header"><h2>Local Tracks</h2><button class="goto-btn" onclick="openSeeAll('tracks')">See All &rarr;</button></div>
+            <div class="layout-list" id="tracksList"></div>
+            <div class="shelf-limit-warning">Showing first 10 tracks. <a onclick="openSeeAll('tracks')">Click here to view all</a></div>
+        </div>
+        <div class="shelf">
+            <div class="shelf-header"><h2>Albums</h2><button class="goto-btn" onclick="openSeeAll('albums')">See All &rarr;</button></div>
+            <div class="layout-scroll" id="albumsShelf"></div>
+            <div class="shelf-limit-warning">Showing first 20 albums. <a onclick="openSeeAll('albums')">Click here to view all</a></div>
+        </div>
+        <div class="shelf">
+            <div class="shelf-header"><h2>Artists</h2><button class="goto-btn" onclick="openSeeAll('artists')">See All &rarr;</button></div>
+            <div class="layout-grid" id="artistsShelf"></div>
+            <div class="shelf-limit-warning">Showing first 20 artists. <a onclick="openSeeAll('artists')">Click here to view all</a></div>
+        </div>
+        <div class="shelf">
+            <div class="shelf-header"><h2>AI Mixes & Playlists</h2><button class="goto-btn" onclick="document.getElementById('settings-dashboard').classList.add('open')">➕ Create New</button></div>
+            <div class="layout-scroll" id="aiPlaylistShelf"></div>
+        </div>
+        <div class="shelf game-shelf">
+            <div class="shelf-header"><h2>🎮 Games</h2><button class="goto-btn" onclick="document.getElementById('game-shelf').scrollIntoView()">PLAY NOW</button></div>
+            <div class="game-card-wrapper">
+                <div class="game-card" onclick="openGame('Aura Racer')"><div class="icon">🏎️</div><div class="name">Aura Racer</div><div class="play-indicator">▶</div></div>
+                <div class="game-card" onclick="openGame('Neon Jumper')"><div class="icon">🦘</div><div class="name">Neon Jumper</div><div class="play-indicator">▶</div></div>
+                <div class="game-card" onclick="openGame('Piano Tiles')"><div class="icon">🎹</div><div class="name">Piano Tiles</div><div class="play-indicator">▶</div></div>
+                <div class="game-card" onclick="openGame('Beat Archery')"><div class="icon">🏹</div><div class="name">Beat Archery</div><div class="play-indicator">▶</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SEE ALL MODAL -->
+    <div id="see-all-modal" class="see-all-modal">
+        <div class="see-all-header">
+            <h2 id="see-all-title">All Tracks</h2>
+            <button class="see-all-close" onclick="closeSeeAll()">✕</button>
+        </div>
+        <div class="see-all-content" id="see-all-content"></div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div id="info-modal">
+        <h3 style="color: var(--neon-alt); margin-bottom: 10px;">Track Info</h3>
+        <div id="info-content"></div>
+        <button class="game-btn close" onclick="closeInfoModal()">Close</button>
+    </div>
+
+    <!-- GAME MODAL -->
+    <div id="game-modal">
+        <div class="game-modal-content">
+            <h2 id="game-title" style="color: var(--neon-alt); margin-bottom:15px;">Game</h2>
+            <canvas id="game-canvas"></canvas>
+            <div id="game-score">Score: 0</div>
+            <div class="game-controls">
+                <button class="game-btn" onclick="restartGame()">🔄 Restart</button>
+                <button class="game-btn close" onclick="closeGame()">✕ Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM DASHBOARD -->
+    <div class="bottom-control-dashboard">
+        <div class="dash-progress-wrapper" onclick="seekMainTimeline(event)"><div class="dash-progress-fill" id="dash-progress"></div></div>
+        <div class="dash-inner-controls">
+            <div class="dash-media-meta">
+                <div class="dash-album-art" id="dash-cover-art">A</div>
+                <div class="dash-song-details">
+                    <div class="dash-song-title" id="dash-title-lbl">Aura Introduction</div>
+                    <div class="dash-song-artist" id="dash-artist-lbl">Aura System</div>
+                    <div class="dash-song-album" id="dash-album-lbl">System Library</div>
+                </div>
+            </div>
+            <div class="dash-center-row">
+                <button class="dash-btn sec-btn" onclick="toggleShuffleMode()" id="dash-shuffle">⤨</button>
+                <button class="dash-btn sec-btn" onclick="skip10Back()">⏪10</button>
+                <button class="dash-btn sec-btn" onclick="playPreviousSong()">⏮</button>
+                <button class="dash-btn main-btn" onclick="togglePlayPauseMain()" id="dash-play-pause-btn">▶</button>
+                <button class="dash-btn sec-btn" onclick="playNextSong()">⏭</button>
+                <button class="dash-btn sec-btn" onclick="skip10Forward()">10⏩</button>
+                <button class="dash-btn sec-btn" onclick="toggleRepeatMode()" id="dash-repeat">🔁</button>
+                <button class="dash-btn sec-btn" onclick="openLibrary()">📚</button>
+                <button class="dash-btn sec-btn" onclick="showTrackInfo()">ℹ️</button>
+                <button class="dash-btn sec-btn" onclick="toggleSettings()" id="dash-settings">⚙️</button>
+            </div>
+        </div>
+        <div class="fresh-handle-footer">@fresh_ent</div>
+    </div>
+
+    <!-- VOLUME BAR -->
+    <div id="volume-bar-container">
+        <span class="dash-volume-icon" onclick="toggleMuteMain()">🔊</span>
+        <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="75" oninput="setVolumeFromSlider(this.value)">
+        <span id="volume-percent">75%</span>
+    </div>
+
+    <audio id="bg-audio"></audio>
+
+    <script>
+        // DATA
+        let localTracks = [], localAlbums = {}, localArtists = {}, playQueue = [], playIndex = -1;
+        let isPlaying = false, isMuted = false, playVolume = 0.75, shuffleMode = false, repeatMode = false;
+        let audioCtx = null, analyserNode = null, audioSourceConnected = false, partyActive = false;
+        let userPlaylists = JSON.parse(localStorage.getItem('aura_playlists')) || [];
+        let categoryRevealState = { tracks: false, albums: false, artists: false };
+        let pendingCoverDataURL = null, defaultPlaylistLoaded = false;
+        let shuffleOrder = [], shuffleIndex = 0;
+        let dailyPlayHistory = JSON.parse(localStorage.getItem('aura_daily_history')) || [];
+        const audio = document.getElementById('bg-audio');
+        const tvVideo = document.getElementById('tv-video');
+        let fadeInterval = null;
+
+        // PRELOADED VIDEOS
+        const preloadedVideos = [
+            { id: 'v1', title: "Neon Subway Drive", artist: "Synthwave Beats", videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-futuristic-subway-station-with-neon-lights-43950-large.mp4", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", votes: 184, img: "🚇" },
+            { id: 'v2', title: "Tokyo Cyber Lights", artist: "Retro Midnight", videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-neon-light-from-a-building-in-a-night-city-43962-large.mp4", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", votes: 142, img: "🌆" },
+            { id: 'v3', title: "Lofi Coding Setup", artist: "Cyber Ambient", videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-cyberpunk-room-with-neon-lights-and-monitors-43960-large.mp4", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", votes: 256, img: "🖥️" }
+        ];
+        let videoTracks = [...preloadedVideos];
+
+        // AUTO-LOAD TRACKS
+        const autoLoadTracks = [
+            { id: 'auto1', title: "Neon Skyline", artist: "Aura Collective", album: "Aura Vol.1", cover: "https://picsum.photos/150/150?random=1", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+            { id: 'auto2', title: "Midnight Drive", artist: "Aura Collective", album: "Aura Vol.1", cover: "https://picsum.photos/150/150?random=2", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+            { id: 'auto3', title: "Cyber Dreams", artist: "Synth Nation", album: "Retro Future", cover: "https://picsum.photos/150/150?random=3", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+            { id: 'auto4', title: "Pixel Rain", artist: "Bit Masters", album: "8-bit World", cover: "https://picsum.photos/150/150?random=4", audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" }
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderVideoShelf(videoTracks);
+            renderAIPlaylistShelf();
+            updateFlowChart();
+            initLiveWave();
+            initMediaSession();
+            buildEqualizerUI();
+            initVolumeControl();
+            loadDefaultPlaylist();
+        });
+
+        function loadDefaultPlaylist() {
+            if(defaultPlaylistLoaded) return;
+            defaultPlaylistLoaded = true;
+            autoLoadTracks.forEach(t => { if(!localTracks.find(l => l.id === t.id)) localTracks.push({ ...t, fileObj: null, votes: 0 }); });
+            autoLoadTracks.forEach(t => {
+                if(!localAlbums[t.album]) localAlbums[t.album] = { artist: t.artist, tracks: [] };
+                localAlbums[t.album].tracks.push(t);
+                if(!localArtists[t.artist]) localArtists[t.artist] = { tracks: [] };
+                localArtists[t.artist].tracks.push(t);
+            });
+            renderLocalTracks(localTracks);
+            renderGroupedShelves();
+            renderAIPlaylistShelf();
+            playQueue = autoLoadTracks;
+            playIndex = 0;
+            if(localTracks.length > 0 && !isPlaying) setTimeout(() => playAutoTrack(localTracks[0].id), 1000);
+        }
+
+        function showNotif(msg) {
+            const bar = document.getElementById('notif-bar');
+            bar.innerHTML = msg;
+            bar.style.display = 'block';
+            clearTimeout(bar._timeout);
+            bar._timeout = setTimeout(() => { bar.style.display = 'none'; }, 4000);
+        }
+
+        function toggleSettings() { document.getElementById('settings-dashboard').classList.toggle('open'); }
+        function setGlobalTheme(cls, el) { document.body.className = cls; document.querySelectorAll('.setting-opt').forEach(o => o.classList.remove('active')); el.classList.add('active'); }
+
+        let eqFilters = [];
+        function buildEqualizerUI() {
+            const container = document.getElementById('eq-container');
+            const freqs = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+            container.innerHTML = '';
+            freqs.forEach(freq => {
+                const band = document.createElement('div');
+                band.className = 'eq-band';
+                band.innerHTML = `<label>${freq}Hz</label><input type="range" min="-12" max="12" step="0.5" value="0" data-freq="${freq}" oninput="updateEQ(this)"><span id="eq-val-${freq}">0.0</span>`;
+                container.appendChild(band);
+            });
+        }
+        function updateEQ(slider) {
+            const val = parseFloat(slider.value), freq = parseInt(slider.dataset.freq);
+            document.getElementById(`eq-val-${freq}`).innerText = val.toFixed(1);
+            if(eqFilters.length > 0) { const filter = eqFilters.find(f => f.frequency.value === freq); if(filter) filter.gain.value = val; }
+        }
+
+        function initWebAudioAPI() {
+            if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            if(audioCtx) return;
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyserNode = audioCtx.createAnalyser();
+                analyserNode.fftSize = 256;
+                if(!audioSourceConnected) {
+                    const source = audioCtx.createMediaElementSource(audio);
+                    const freqs = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000];
+                    eqFilters = [];
+                    let prevNode = source;
+                    freqs.forEach(f => {
+                        const filter = audioCtx.createBiquadFilter();
+                        filter.type = 'peaking';
+                        filter.frequency.value = f;
+                        filter.Q.value = 1.0;
+                        filter.gain.value = 0;
+                        prevNode.connect(filter);
+                        prevNode = filter;
+                        eqFilters.push(filter);
+                    });
+                    prevNode.connect(analyserNode);
+                    analyserNode.connect(audioCtx.destination);
+                    audioSourceConnected = true;
+                }
+                initLiveWave();
+            } catch(e) { console.warn("Web Audio unavailable"); }
+        }
+
+        function initMediaSession() {
+            if (!navigator.mediaSession) return;
+            navigator.mediaSession.setActionHandler('play', () => togglePlayPauseMain());
+            navigator.mediaSession.setActionHandler('pause', () => togglePlayPauseMain());
+            navigator.mediaSession.setActionHandler('previoustrack', () => playPreviousSong());
+            navigator.mediaSession.setActionHandler('nexttrack', () => playNextSong());
+            navigator.mediaSession.setActionHandler('seekto', (details) => { if (details.seekTime) audio.currentTime = details.seekTime; });
+        }
+
+        function updateMediaSession(title, artist, album, img) {
+            if (!navigator.mediaSession) return;
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: title || 'Unknown', artist: artist || 'Unknown', album: album || 'Aura Library',
+                artwork: [{ src: img || 'https://via.placeholder.com/150', sizes: '150x150', type: 'image/png' }]
+            });
+        }
+
+        function togglePartyMode() {
+            partyActive = !partyActive;
+            document.body.classList.toggle('party-active', partyActive);
+            showNotif(partyActive ? "Party Mode ON!" : "Party Mode OFF");
+            if(partyActive) initWebAudioAPI();
+        }
+
+        // Cover extraction from MP3 file
+        function extractCoverFromFile(file, callback) {
+            if (!file.name.toLowerCase().endsWith('.mp3')) { callback(null); return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const buffer = e.target.result;
+                const data = new Uint8Array(buffer);
+                if (data[0] === 0x49 && data[1] === 0x44 && data[2] === 0x33) {
+                    let offset = 10;
+                    const size = ((data[6] & 0x7f) << 21) | ((data[7] & 0x7f) << 14) | ((data[8] & 0x7f) << 7) | (data[9] & 0x7f);
+                    const end = offset + size;
+                    while (offset < end - 10) {
+                        const frameId = String.fromCharCode(data[offset], data[offset+1], data[offset+2], data[offset+3]);
+                        const frameSize = (data[offset+4] << 24) | (data[offset+5] << 16) | (data[offset+6] << 8) | data[offset+7];
+                        if (frameId === 'APIC') {
+                            let pos = offset + 10;
+                            pos++;
+                            let mimeEnd = pos;
+                            while (data[mimeEnd] !== 0) mimeEnd++;
+                            let mime = String.fromCharCode(...data.slice(pos, mimeEnd));
+                            pos = mimeEnd + 1;
+                            pos++;
+                            let descEnd = pos;
+                            while (data[descEnd] !== 0) descEnd++;
+                            pos = descEnd + 1;
+                            const pictureData = data.slice(pos, pos + frameSize - (pos - (offset+10)));
+                            const blob = new Blob([pictureData], { type: mime });
+                            const url = URL.createObjectURL(blob);
+                            callback(url);
+                            return;
+                        }
+                        offset += 10 + frameSize;
+                    }
+                }
+                callback(null);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // Crossfade function
+        function crossfadeTo(trackId, duration = 1.5) {
+            if (fadeInterval) clearInterval(fadeInterval);
+            if (isPlaying) {
+                const startVol = audio.volume;
+                const steps = 30;
+                let step = 0;
+                fadeInterval = setInterval(() => {
+                    step++;
+                    audio.volume = startVol * (1 - step/steps);
+                    if (step >= steps) {
+                        clearInterval(fadeInterval);
+                        playLocalTrack(trackId);
+                        audio.volume = 0;
+                        const fadeInSteps = 30;
+                        let fadeStep = 0;
+                        fadeInterval = setInterval(() => {
+                            fadeStep++;
+                            audio.volume = playVolume * (fadeStep/fadeInSteps);
+                            if (fadeStep >= fadeInSteps) {
+                                clearInterval(fadeInterval);
+                                audio.volume = playVolume;
+                            }
+                        }, duration * 1000 / fadeInSteps);
+                    }
+                }, duration * 1000 / steps);
+            } else {
+                playLocalTrack(trackId);
+                audio.volume = 0;
+                const fadeInSteps = 30;
+                let fadeStep = 0;
+                fadeInterval = setInterval(() => {
+                    fadeStep++;
+                    audio.volume = playVolume * (fadeStep/fadeInSteps);
+                    if (fadeStep >= fadeInSteps) {
+                        clearInterval(fadeInterval);
+                        audio.volume = playVolume;
+                    }
+                }, duration * 1000 / fadeInSteps);
+            }
+        }
+
+        // Activate Shuffle (immediate)
+        function activateShuffle() {
+            if (playQueue.length < 2) { showNotif("Not enough tracks to shuffle"); return; }
+            shuffleMode = true;
+            generateShuffleOrder();
+            playIndex = shuffleOrder[0];
+            playCurrentIndex();
+            showNotif("Shuffled & playing!");
+            updateShuffleButtonUI();
+        }
+
+        // Playlist detail modal
+        function openPlaylistDetail(playlist) {
+            const modal = document.getElementById('see-all-modal');
+            const content = document.getElementById('see-all-content');
+            const title = document.getElementById('see-all-title');
+            content.innerHTML = '';
+            modal.classList.add('open');
+            title.textContent = 'Playlist: ' + playlist.title;
+            if (playlist.tracks.length === 0) {
+                content.innerHTML = '<p style="text-align:center;color:#666;">No tracks yet.</p>';
+            } else {
+                playlist.tracks.forEach(track => {
+                    const item = document.createElement('div');
+                    item.className = 'see-all-item';
+                    item.innerHTML = `<div class="title">${track.title}</div><div style="font-size:0.7rem;">${track.artist}</div>`;
+                    item.onclick = () => { crossfadeTo(track.id); closeSeeAll(); };
+                    content.appendChild(item);
+                });
+            }
+            const addBtn = document.createElement('button');
+            addBtn.innerHTML = '+ Add Track';
+            addBtn.style.cssText = 'margin-top:15px;padding:8px 15px;background:var(--neon-accent);color:#000;border:none;border-radius:20px;font-weight:bold;cursor:pointer;';
+            addBtn.onclick = () => { openTrackPicker(playlist); };
+            content.appendChild(addBtn);
+        }
+
+        function openTrackPicker(playlist) {
+            const modal = document.getElementById('see-all-modal');
+            const content = document.getElementById('see-all-content');
+            const title = document.getElementById('see-all-title');
+            content.innerHTML = '';
+            modal.classList.add('open');
+            title.textContent = 'Add Track to: ' + playlist.title;
+            localTracks.forEach(track => {
+                const item = document.createElement('div');
+                item.className = 'see-all-item';
+                item.innerHTML = `<div class="title">${track.title}</div><div style="font-size:0.7rem;">${track.artist}</div>`;
+                item.onclick = () => {
+                    if (!playlist.tracks.find(t => t.id === track.id)) {
+                        playlist.tracks.push(track);
+                        // If it's an AI mix (not in userPlaylists), convert to user playlist
+                        if (!userPlaylists.find(p => p.id === playlist.id)) {
+                            userPlaylists.push(playlist);
+                        }
+                        localStorage.setItem('aura_playlists', JSON.stringify(userPlaylists));
+                        showNotif(`Added "${track.title}" to ${playlist.title}`);
+                        openPlaylistDetail(playlist);
+                    } else {
+                        showNotif("Track already in playlist");
+                    }
+                };
+                content.appendChild(item);
+            });
+        }
+
+        // Generate AI Mix (existing)
+        function generateAIMix() {
+            if(localTracks.length === 0) return [];
+            const grouped = {};
+            localTracks.forEach(t => {
+                const key = (t.artist.length % 2 === 0) ? "Lo-Fi Waves" : "Neon Pulse";
+                if(!grouped[key]) grouped[key] = [];
+                grouped[key].push(t);
+            });
+            return Object.keys(grouped).map((name, idx) => ({
+                id: 'ai_mix_' + idx,
+                title: name,
+                artist: "Aura AI",
+                album: "AI Generated",
+                tracks: grouped[name],
+                img: "🤖",
+                isMix: true
+            }));
+        }
+
+        function handleCoverUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = function(event) { pendingCoverDataURL = event.target.result; document.getElementById('cover-filename').innerText = file.name; };
+            reader.readAsDataURL(file);
+        }
+
+        function createNewPlaylist() {
+            const name = document.getElementById('new-playlist-name').value;
+            if(!name) return showNotif("Enter a playlist name!");
+            const newPlaylist = { id: 'pl_' + Date.now(), title: name, artist: "User Created", album: "Custom", img: pendingCoverDataURL || "🎵", tracks: [], isMix: true };
+            userPlaylists.push(newPlaylist);
+            localStorage.setItem('aura_playlists', JSON.stringify(userPlaylists));
+            renderAIPlaylistShelf();
+            showNotif(`Playlist "${name}" created!`);
+            document.getElementById('new-playlist-name').value = '';
+            document.getElementById('cover-filename').innerText = 'No file chosen';
+            pendingCoverDataURL = null;
+            document.getElementById('playlist-cover-input').value = '';
+        }
+
+        function renderAIPlaylistShelf() {
+            const shelf = document.getElementById('aiPlaylistShelf');
+            shelf.innerHTML = '';
+            const aiMixes = generateAIMix();
+            aiMixes.forEach(m => {
+                const card = document.createElement('div');
+                card.className = 'item-card ai-mix-card';
+                card.style.width = '150px'; card.style.height = '150px';
+                card.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:flex-end; height:100%; padding:10px;"><span style="font-size:2rem;">${m.img}</span><span style="font-weight:bold; text-shadow: 0 0 5px #000;">${m.title}</span><span style="font-size:0.7rem; color:var(--neon-alt);">${m.tracks.length} tracks</span></div>`;
+                card.onclick = () => openPlaylistDetail(m);
+                shelf.appendChild(card);
+            });
+            userPlaylists.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'item-card playlist-card';
+                if(p.img && p.img.startsWith('data:image')) {
+                    card.innerHTML = `<img src="${p.img}" alt="Cover"><div class="content"><span style="font-weight:bold; text-shadow: 0 0 5px #000;">${p.title}</span><span style="font-size:0.7rem; color:var(--text-muted);">User Playlist</span></div>`;
+                } else {
+                    card.innerHTML = `<div class="content" style="padding:10px; display:flex; flex-direction:column; justify-content:flex-end; height:100%;"><span style="font-size:1.5rem;">${p.img}</span><span style="font-weight:bold; text-shadow: 0 0 5px #000;">${p.title}</span><span style="font-size:0.7rem; color:var(--text-muted);">User Playlist</span></div>`;
+                }
+                card.onclick = () => openPlaylistDetail(p);
+                shelf.appendChild(card);
+            });
+        }
+
+        function playAIMix(mix) { playQueue = mix.tracks; playIndex = 0; activeMediaType = 'audio'; playLocalTrack(playQueue[0].id); showNotif(`Playing AI Mix: ${mix.title}`); }
+
+        function openSeeAll(category) {
+            const modal = document.getElementById('see-all-modal');
+            const content = document.getElementById('see-all-content');
+            const title = document.getElementById('see-all-title');
+            content.innerHTML = '';
+            modal.classList.add('open');
+            if(category === 'videos') {
+                title.textContent = 'All Videos';
+                videoTracks.forEach(v => { const item = document.createElement('div'); item.className = 'see-all-item'; item.innerHTML = `<div style="font-size:2rem;">${v.img}</div><div class="title">${v.title}</div><div style="font-size:0.7rem;">${v.artist}</div>`; item.onclick = () => { playVideoTrack(v.id); closeSeeAll(); }; content.appendChild(item); });
+            } else if(category === 'tracks') {
+                title.textContent = 'All Tracks';
+                localTracks.forEach(t => { const item = document.createElement('div'); item.className = 'see-all-item'; item.innerHTML = `<div class="title">${t.title}</div><div style="font-size:0.7rem;">${t.artist}</div>`; item.onclick = () => { playLocalTrack(t.id); closeSeeAll(); }; content.appendChild(item); });
+            } else if(category === 'albums') {
+                title.textContent = 'All Albums';
+                Object.keys(localAlbums).forEach(albumName => { const alb = localAlbums[albumName]; const item = document.createElement('div'); item.className = 'see-all-item'; item.innerHTML = `<div class="title">${albumName}</div><div style="font-size:0.7rem;">${alb.artist}</div>`; item.onclick = () => { playAlbumCategory(albumName); closeSeeAll(); }; content.appendChild(item); });
+            } else if(category === 'artists') {
+                title.textContent = 'All Artists';
+                Object.keys(localArtists).forEach(artistName => { const art = localArtists[artistName]; const item = document.createElement('div'); item.className = 'see-all-item'; item.innerHTML = `<div class="title">${artistName}</div><div style="font-size:0.7rem;">${art.tracks.length} songs</div>`; item.onclick = () => { playArtistCategory(artistName); closeSeeAll(); }; content.appendChild(item); });
+            }
+        }
+        function closeSeeAll() { document.getElementById('see-all-modal').classList.remove('open'); }
+        function revealFullCategory(type) { openSeeAll(type); }
+
+        function renderLocalTracks(tList) {
+            const listContainer = document.getElementById('tracksList');
+            listContainer.innerHTML = '';
+            const limit = categoryRevealState.tracks ? tList : tList.slice(0, 10);
+            if (limit.length === 0) {
+                listContainer.innerHTML = `<div class="storage-trigger-card" onclick="scanMobileStorage()" style="padding:20px; text-align:center; border:2px dashed var(--neon-accent);"><span style="font-size:2rem;">📂</span><br><span>Tap to Scan Phone Storage</span></div>`;
+                return;
+            }
+            limit.forEach(t => {
+                const row = document.createElement('div');
+                row.className = `item-card ${playQueue[playIndex] && playQueue[playIndex].id === t.id ? 'active' : ''}`;
+                row.id = `local-row-${t.id}`;
+                row.onclick = () => playLocalTrack(t.id);
+                const cover = t.cover ? `<img src="${t.cover}" style="width:30px;height:30px;border-radius:4px;object-fit:cover;display:inline-block;vertical-align:middle;margin-right:8px;">` : '';
+                row.innerHTML = `<div style="display:flex; justify-content:space-between; align-items:center; width:100%;"><div style="flex:1; min-width:0;">${cover}<span style="font-weight:bold;">${t.title}</span><br><span style="font-size:0.75rem;color:#777;">${t.artist}</span></div><button onclick="event.stopPropagation(); likeAlbum('${t.album}')" style="background:transparent; border:none; color:var(--neon-accent); cursor:pointer;">❤️ <span id="album-like-${t.album}">${JSON.parse(localStorage.getItem('aura_album_likes') || '{}')[t.album] || 0}</span></button></div>`;
+                listContainer.appendChild(row);
+            });
+        }
+
+        function renderGroupedShelves(type) {
+            const albumShelf = document.getElementById('albumsShelf');
+            const artistShelf = document.getElementById('artistsShelf');
+            if(type === 'albums' || !type) albumShelf.innerHTML = '';
+            if(type === 'artists' || !type) artistShelf.innerHTML = '';
+            let albumsKeys = Object.keys(localAlbums);
+            if(!categoryRevealState.albums) albumsKeys = albumsKeys.slice(0, 20);
+            if(type === 'albums' || !type) {
+                albumsKeys.forEach(albKey => {
+                    const alb = localAlbums[albKey];
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.style.width = '150px'; card.style.height = '150px';
+                    const cover = alb.tracks[0]?.cover ? `<img src="${alb.tracks[0].cover}" style="width:100%;height:80px;object-fit:cover;border-radius:5px;margin-bottom:5px;">` : '';
+                    card.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:flex-end; height:100%; padding:10px;">${cover}<span style="font-weight:bold; text-shadow:0 0 5px #000;">${albKey}</span><br><span style="font-size:0.7rem; color:#ddd;">${alb.artist}</span></div>`;
+                    card.onclick = () => playAlbumCategory(albKey);
+                    albumShelf.appendChild(card);
+                });
+            }
+            let artistKeys = Object.keys(localArtists);
+            if(!categoryRevealState.artists) artistKeys = artistKeys.slice(0, 20);
+            if(type === 'artists' || !type) {
+                artistKeys.forEach(artKey => {
+                    const art = localArtists[artKey];
+                    const card = document.createElement('div');
+                    card.className = 'item-card';
+                    card.style.height = '130px';
+                    card.innerHTML = `<div style="display:flex; flex-direction:column; justify-content:center; height:100%; padding:10px;"><span style="font-weight:bold; text-shadow:0 0 5px #000;">${artKey}</span><br><span style="font-size:0.7rem; color:#ddd;">${art.tracks.length} songs</span></div>`;
+                    card.onclick = () => playArtistCategory(artKey);
+                    artistShelf.appendChild(card);
+                });
+            }
+        }
+
+        // FIXED SCANNER
+        async function scanMobileStorage() {
+            showNotif("Scanning for audio...");
+            if('showDirectoryPicker' in window) {
+                try {
+                    const dirHandle = await window.showDirectoryPicker();
+                    const files = [];
+                    for await (const entry of dirHandle.values()) {
+                        if(entry.kind === 'file' && /\.(mp3|wav|m4a|ogg)$/i.test(entry.name)) {
+                            const file = await entry.getFile();
+                            files.push(file);
+                        }
+                    }
+                    processFiles(files);
+                    return;
+                } catch (err) { if(err.name === 'AbortError') { showNotif("Cancelled."); return; } }
+            }
+            const dirInput = document.createElement('input');
+            dirInput.type = 'file';
+            if('webkitdirectory' in dirInput) {
+                dirInput.webkitdirectory = true;
+                dirInput.multiple = true;
+                dirInput.accept = 'audio/*';
+                dirInput.onchange = (e) => {
+                    const files = Array.from(e.target.files).filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|ogg)$/i.test(f.name));
+                    if(files.length) processFiles(files); else showNotif("No audio files in folder.");
+                };
+                dirInput.click();
+                return;
+            }
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.multiple = true;
+            fileInput.accept = 'audio/*';
+            fileInput.onchange = (e) => {
+                const files = Array.from(e.target.files).filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|ogg)$/i.test(f.name));
+                if(files.length) processFiles(files); else showNotif("No audio files selected.");
+            };
+            fileInput.click();
+        }
+
+        function processFiles(files) {
+            if(!files.length) { showNotif("No audio files found."); return; }
+            let idCounter = 1;
+            localTracks = [];
+            localAlbums = {};
+            localArtists = {};
+            files.forEach(file => {
+                let title = file.name.replace(/\.[^/.]+$/, ""), artist="Unknown", album="Local";
+                if(title.includes(" - ")) { const p = title.split(" - ",2); artist=p[0]; title=p[1]; }
+                const track = { id:'local_'+(idCounter++), title, artist, album, fileObj:file, votes:0, cover:null };
+                localTracks.push(track);
+                if(!localAlbums[album]) localAlbums[album]={artist, tracks:[]};
+                localAlbums[album].tracks.push(track);
+                if(!localArtists[artist]) localArtists[artist]={tracks:[]};
+                localArtists[artist].tracks.push(track);
+                // Extract cover
+                extractCoverFromFile(file, (coverUrl) => {
+                    if (coverUrl) {
+                        track.cover = coverUrl;
+                        renderLocalTracks(localTracks);
+                        renderGroupedShelves();
+                    }
+                });
+            });
+            playQueue = localTracks;
+            playIndex = 0;
+            if(shuffleMode) generateShuffleOrder();
+            renderLocalTracks(localTracks);
+            renderGroupedShelves();
+            renderAIPlaylistShelf();
+            showNotif(`Loaded ${localTracks.length} tracks!`);
+            if(localTracks.length > 0) {
+                playLocalTrack(localTracks[0].id);
+            }
+        }
+
+        function likeAlbum(albumName) {
+            let likes = JSON.parse(localStorage.getItem('aura_album_likes') || '{}');
+            likes[albumName] = (likes[albumName] || 0) + 1;
+            localStorage.setItem('aura_album_likes', JSON.stringify(likes));
+            const el = document.getElementById(`album-like-${albumName}`);
+            if(el) el.innerText = likes[albumName];
+            showNotif(`Liked Album: ${albumName}`);
+        }
+
+        function playVideoTrack(trackId) {
+            const v = videoTracks.find(t => t.id === trackId);
+            if(!v) return;
+            playQueue = videoTracks; playIndex = playQueue.findIndex(t => t.id === trackId);
+            audio.src = v.audioUrl;
+            audio.load();
+            audio.play().then(() => { isPlaying = true; updateDashboardControlsUI(); }).catch(e => showNotif("Tap Play to start audio"));
+            updatePlayingMetadata(v.title, v.artist, "Trending", v.img);
+            trackPlayed();
+        }
+
+        function playAutoTrack(trackId) {
+            const t = localTracks.find(t => t.id === trackId);
+            if(!t) return;
+            if(t.audioUrl) { audio.src = t.audioUrl; audio.load(); initWebAudioAPI(); audio.play().then(() => { isPlaying = true; updateDashboardControlsUI(); }).catch(e => showNotif("Tap Play button on dashboard to start audio.")); }
+            else if(t.fileObj) { playLocalTrack(trackId); return; }
+            else { showNotif("No audio URL."); return; }
+            updatePlayingMetadata(t.title, t.artist, t.album, t.cover || t.title[0]);
+            trackPlayed();
+        }
+
+        function playLocalTrack(trackId) {
+            const t = localTracks.find(t => t.id === trackId);
+            if(!t) return showNotif("Track not found");
+            if(t.fileObj) {
+                if(audio.src && audio.src.startsWith('blob:')) URL.revokeObjectURL(audio.src);
+                audio.src = URL.createObjectURL(t.fileObj);
+                audio.load();
+                initWebAudioAPI();
+                audio.play().then(() => { isPlaying = true; updateDashboardControlsUI(); }).catch(e => showNotif("Tap Play button on dashboard to start audio."));
+            } else if(t.audioUrl) {
+                audio.src = t.audioUrl;
+                audio.load();
+                initWebAudioAPI();
+                audio.play().then(() => { isPlaying = true; updateDashboardControlsUI(); }).catch(e => showNotif("Tap Play button on dashboard to start audio."));
+            } else { showNotif("No playable source."); return; }
+            updatePlayingMetadata(t.title, t.artist, t.album, t.cover || t.title[0]);
+            trackPlayed();
+        }
+
+        function updatePlayingMetadata(title, artist, album, img) {
+            document.getElementById('nowPlayingSong').innerText = title;
+            document.getElementById('dash-title-lbl').innerText = title;
+            document.getElementById('nowPlayingArtist').innerText = artist;
+            document.getElementById('dash-artist-lbl').innerText = artist;
+            document.getElementById('nowPlayingAlbum').innerText = album;
+            document.getElementById('dash-album-lbl').innerText = album || '';
+            document.getElementById('dash-cover-art').innerText = img || 'A';
+            document.getElementById('tv-live-wave').classList.add('active');
+            updateMediaSession(title, artist, album, img);
+        }
+
+        function togglePlayPauseMain() {
+            initWebAudioAPI();
+            if(isPlaying) { audio.pause(); isPlaying = false; } else { audio.play().then(() => { isPlaying = true; }).catch(e => showNotif("Please load a track first.")); }
+            updateDashboardControlsUI();
+        }
+
+        function updateDashboardControlsUI() { document.getElementById('dash-play-pause-btn').innerText = isPlaying ? '⏸' : '▶'; }
+
+        function toggleShuffleMode() {
+            shuffleMode = !shuffleMode;
+            if(shuffleMode) generateShuffleOrder();
+            else shuffleOrder = [];
+            showNotif(`Shuffle: ${shuffleMode?'ON':'OFF'}`);
+            updateShuffleButtonUI();
+        }
+
+        function generateShuffleOrder() {
+            shuffleOrder = [];
+            for(let i=0; i<playQueue.length; i++) shuffleOrder.push(i);
+            for(let i=shuffleOrder.length-1; i>0; i--) {
+                let j = Math.floor(Math.random() * (i+1));
+                [shuffleOrder[i], shuffleOrder[j]] = [shuffleOrder[j], shuffleOrder[i]];
+            }
+            shuffleIndex = 0;
+            if(playIndex >= 0) { let pos = shuffleOrder.indexOf(playIndex); if(pos !== -1) shuffleIndex = pos; }
+            updateShuffleButtonUI();
+        }
+
+        function updateShuffleButtonUI() { document.getElementById('dash-shuffle').classList.toggle('active', shuffleMode); }
+        function getNextIndex() {
+            if(shuffleMode && shuffleOrder.length > 0) {
+                shuffleIndex = (shuffleIndex + 1) % shuffleOrder.length;
+                return shuffleOrder[shuffleIndex];
+            } else return (playIndex + 1) % playQueue.length;
+        }
+        function getPrevIndex() {
+            if(shuffleMode && shuffleOrder.length > 0) {
+                shuffleIndex = (shuffleIndex - 1 + shuffleOrder.length) % shuffleOrder.length;
+                return shuffleOrder[shuffleIndex];
+            } else return (playIndex - 1 + playQueue.length) % playQueue.length;
+        }
+        function toggleRepeatMode() { repeatMode = !repeatMode; showNotif(`Repeat: ${repeatMode?'ON':'OFF'}`); }
+        function playNextSong() {
+            if(playQueue.length===0)return;
+            const nextIndex = getNextIndex();
+            const nextTrack = playQueue[nextIndex];
+            playIndex = nextIndex;
+            if(nextTrack.isMix) { playAIMix(nextTrack); }
+            else { crossfadeTo(nextTrack.id, 1.2); }
+        }
+        function playPreviousSong() { if(playQueue.length===0)return; playIndex = getPrevIndex(); playCurrentIndex(); }
+        function playCurrentIndex() {
+            const t = playQueue[playIndex];
+            if(t.isMix) return playAIMix(t);
+            if(t.id.startsWith('v')) return playVideoTrack(t.id);
+            return playLocalTrack(t.id);
+        }
+
+        function skip10Forward() { if(!isNaN(audio.duration)) { audio.currentTime = Math.min(audio.currentTime + 10, audio.duration); showNotif('+10s'); } else showNotif('No track loaded'); }
+        function skip10Back() { if(!isNaN(audio.duration)) { audio.currentTime = Math.max(audio.currentTime - 10, 0); showNotif('-10s'); } else showNotif('No track loaded'); }
+        function openLibrary() { openSeeAll('tracks'); }
+        function showTrackInfo() {
+            const infoModal = document.getElementById('info-modal');
+            const infoContent = document.getElementById('info-content');
+            const title = document.getElementById('nowPlayingSong').innerText;
+            const artist = document.getElementById('nowPlayingArtist').innerText;
+            const album = document.getElementById('nowPlayingAlbum').innerText;
+            infoContent.innerHTML = `<p><strong>Title:</strong> ${title}</p><p><strong>Artist:</strong> ${artist}</p><p><strong>Album:</strong> ${album}</p>`;
+            infoModal.classList.add('open');
+        }
+        function closeInfoModal() { document.getElementById('info-modal').classList.remove('open'); }
+
+        function initVolumeControl() {
+            const slider = document.getElementById('volume-slider');
+            const percent = document.getElementById('volume-percent');
+            slider.value = playVolume * 100;
+            percent.textContent = Math.round(playVolume * 100) + '%';
+            slider.addEventListener('input', function() { setVolumeFromSlider(this.value); });
+        }
+        function setVolumeFromSlider(value) { playVolume = value / 100; audio.volume = playVolume; document.getElementById('volume-percent').textContent = Math.round(playVolume * 100) + '%'; }
+        function toggleMuteMain() { audio.muted = !audio.muted; const icon = document.querySelector('.dash-volume-icon'); icon.innerText = audio.muted ? '🔇' : '🔊'; }
+
+        function updateFlowChart() {
+            const container = document.getElementById('flow-chart-layout');
+            container.innerHTML = '';
+            const history = dailyPlayHistory.slice(-14);
+            const maxVal = Math.max(...history.map(h => h.count), 1);
+            history.forEach(day => {
+                const bar = document.createElement('div'); bar.className = 'flow-bar';
+                const pct = (day.count / maxVal) * 100;
+                bar.style.height = Math.max(pct, 10) + '%';
+                container.appendChild(bar);
+                const label = document.createElement('div'); label.className = 'flow-label'; label.innerText = day.date;
+                container.appendChild(label);
+            });
+        }
+        function trackPlayed() {
+            const today = new Date().toLocaleDateString();
+            let found = dailyPlayHistory.find(d => d.date === today);
+            if(found) found.count++;
+            else { dailyPlayHistory.push({ date: today, count: 1 }); }
+            localStorage.setItem('aura_daily_history', JSON.stringify(dailyPlayHistory));
+            updateFlowChart();
+        }
+
+        function initLiveWave() {
+            const canvas = document.getElementById('tv-live-wave');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+            function drawWave() {
+                if(!audioCtx || audioCtx.state !== 'running') { requestAnimationFrame(drawWave); return; }
+                const bufferLength = analyserNode.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyserNode.getByteFrequencyData(dataArray);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.strokeStyle = partyActive ? '#00f3ff' : '#ff2a5f';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = partyActive ? '#00f3ff' : '#ff2a5f';
+                const step = Math.floor(bufferLength / canvas.width);
+                for(let i=0; i<canvas.width; i++) {
+                    const val = dataArray[i*step] || 0;
+                    const y = canvas.height - (val / 255) * canvas.height * 0.9;
+                    if(i===0) ctx.moveTo(i, y);
+                    else ctx.lineTo(i, y);
+                }
+                ctx.stroke();
+                requestAnimationFrame(drawWave);
+            }
+            drawWave();
+        }
+
+        function handleGlobalSearch(q) {
+            const query = q.toLowerCase().trim();
+            if(!query) { renderVideoShelf(videoTracks); renderLocalTracks(localTracks); return; }
+            const fv = videoTracks.filter(v => v.title.toLowerCase().includes(query));
+            const fl = localTracks.filter(t => t.title.toLowerCase().includes(query) || t.artist.toLowerCase().includes(query));
+            renderVideoShelf(fv);
+            renderLocalTracks(fl);
+        }
+
+        function renderVideoShelf(list) {
+            const shelf = document.getElementById('videoShelf');
+            shelf.innerHTML = '';
+            list.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'video-shelf-card';
+                card.innerHTML = `<div><span>${v.img}</span><br><span>${v.title}</span></div>`;
+                card.onclick = () => playVideoTrack(v.id);
+                shelf.appendChild(card);
+            });
+        }
+
+        function seekMainTimeline(e) { if(!isNaN(audio.duration)) audio.currentTime = (e.offsetX / e.currentTarget.offsetWidth) * audio.duration; }
+        function adjustMainVolume(e) { audio.volume = e.offsetX / e.currentTarget.offsetWidth; document.getElementById('dash-volume-fill').style.width = `${audio.volume*100}%`; }
+        function playAlbumCategory(album) { playQueue = localAlbums[album].tracks; playIndex=0; if(shuffleMode) generateShuffleOrder(); playCurrentIndex(); }
+        function playArtistCategory(artist) { playQueue = localArtists[artist].tracks; playIndex=0; if(shuffleMode) generateShuffleOrder(); playCurrentIndex(); }
+        function checkEndlessScroll(el) { if(el.scrollLeft + el.clientWidth >= el.scrollWidth - 50) { videoTracks.push({...preloadedVideos[Math.floor(Math.random()*preloadedVideos.length)], id:'v_'+Date.now()}); renderVideoShelf(videoTracks); } }
+
+        // GAMES (existing)
+        let gameRunning = false, gameAnimId = null, gameScore = 0, gameType = '';
+        let gamePlayer = { x: 50, y: 200, w: 20, h: 20, vy: 0 }, gameObstacles = [], gameGravity = 0.6, gameJumpPower = -12;
+        let tiles = [], tileSpeed = 4, tileWidth = 100, tileHeight = 30;
+        let arrows = [], targets = [], arrowSpeed = 8, targetSpeed = 3, lastBeatTime = 0;
+
+        function openGame(type) {
+            gameType = type;
+            document.getElementById('game-title').innerText = type;
+            document.getElementById('game-modal').classList.add('open');
+            if(gameAnimId) cancelAnimationFrame(gameAnimId);
+            resetGame();
+            if(!isPlaying) togglePlayPauseMain();
+        }
+        function closeGame() {
+            document.getElementById('game-modal').classList.remove('open');
+            if(gameAnimId) cancelAnimationFrame(gameAnimId);
+            gameRunning = false;
+        }
+        function resetGame() {
+            gameScore = 0;
+            document.getElementById('game-score').innerText = "Score: 0";
+            if(gameType === 'Neon Jumper') { gamePlayer.y = 200; gamePlayer.vy = 0; gameObstacles = []; }
+            else if(gameType === 'Piano Tiles') { tiles = []; tileSpeed = 4; }
+            else if(gameType === 'Beat Archery') { arrows = []; targets = []; targetSpeed = 3; }
+            gameRunning = true;
+            if(gameAnimId) cancelAnimationFrame(gameAnimId);
+            gameLoop();
+        }
+        function restartGame() { resetGame(); }
+        function gameLoop() {
+            if(!gameRunning) return;
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            let isBeat = false;
+            if (analyserNode && audioCtx.state === 'running') {
+                const dataArray = new Uint8Array(analyserNode.frequencyBinCount);
+                analyserNode.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+                let avg = sum / dataArray.length;
+                if(avg > 100 && performance.now() - lastBeatTime > 200) { isBeat = true; lastBeatTime = performance.now(); }
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(gameType === 'Neon Jumper') {
+                gamePlayer.vy += gameGravity;
+                gamePlayer.y += gamePlayer.vy;
+                if(gamePlayer.y > 220) { gamePlayer.y = 220; gamePlayer.vy = 0; }
+                if(isBeat) gameObstacles.push({ x: canvas.width, y: 240, w: 20, h: 20 });
+                for(let i = gameObstacles.length - 1; i >= 0; i--) {
+                    let obs = gameObstacles[i];
+                    obs.x -= 5;
+                    if(obs.x + obs.w < 0) { gameObstacles.splice(i, 1); gameScore++; }
+                    if(gamePlayer.x < obs.x + obs.w && gamePlayer.x + gamePlayer.w > obs.x && gamePlayer.y < obs.y + obs.h && gamePlayer.y + gamePlayer.h > obs.y) {
+                        gameRunning = false;
+                        showNotif(`Game Over! Score: ${gameScore}`);
+                    }
+                }
+                ctx.fillStyle = '#00f3ff'; ctx.shadowBlur = 20; ctx.shadowColor = '#00f3ff';
+                ctx.fillRect(gamePlayer.x, gamePlayer.y, gamePlayer.w, gamePlayer.h);
+                ctx.fillStyle = '#ff2a5f'; ctx.shadowBlur = 20; ctx.shadowColor = '#ff2a5f';
+                gameObstacles.forEach(obs => ctx.fillRect(obs.x, obs.y, obs.w, obs.h));
+            } else if(gameType === 'Piano Tiles') {
+                if(isBeat) tiles.push({ x: Math.random() * (canvas.width - tileWidth), y: -tileHeight });
+                for(let i = tiles.length - 1; i >= 0; i--) {
+                    tiles[i].y += tileSpeed;
+                    if(tiles[i].y > canvas.height) { tiles.splice(i, 1); gameScore++; }
+                }
+                ctx.fillStyle = '#00f3ff'; ctx.shadowBlur = 15; ctx.shadowColor = '#00f3ff';
+                tiles.forEach(tile => ctx.fillRect(tile.x, tile.y, tileWidth, tileHeight));
+                ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(0, canvas.height - 5); ctx.lineTo(canvas.width, canvas.height - 5); ctx.stroke();
+            } else if(gameType === 'Beat Archery') {
+                if(isBeat) targets.push({ x: canvas.width, y: Math.random() * canvas.height });
+                for(let i = targets.length - 1; i >= 0; i--) {
+                    targets[i].x -= targetSpeed;
+                    if(targets[i].x < -20) { targets.splice(i, 1); gameScore++; }
+                }
+                for(let i = arrows.length - 1; i >= 0; i--) {
+                    let arrow = arrows[i];
+                    arrow.x += arrowSpeed;
+                    for(let j = targets.length - 1; j >= 0; j--) {
+                        let target = targets[j];
+                        if(Math.abs(arrow.x - target.x) < 10 && Math.abs(arrow.y - target.y) < 10) { targets.splice(j, 1); arrows.splice(i, 1); gameScore += 10; break; }
+                    }
+                    if(arrow.x > canvas.width) arrows.splice(i, 1);
+                }
+                ctx.fillStyle = '#ff2a5f'; ctx.shadowBlur = 15; ctx.shadowColor = '#ff2a5f';
+                targets.forEach(t => { ctx.beginPath(); ctx.arc(t.x, t.y, 10, 0, Math.PI*2); ctx.fill(); });
+                ctx.fillStyle = '#fff'; ctx.shadowBlur = 5; ctx.shadowColor = '#fff';
+                arrows.forEach(a => ctx.fillRect(a.x, a.y, 5, 2));
+            }
+            document.getElementById('game-score').innerText = `Score: ${gameScore}`;
+            if(gameRunning) gameAnimId = requestAnimationFrame(gameLoop);
+        }
+        document.getElementById('game-canvas').addEventListener('click', (e) => {
+            if(!gameRunning) return;
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            if(gameType === 'Neon Jumper') { if(gamePlayer.y >= 220) gamePlayer.vy = gameJumpPower; }
+            else if(gameType === 'Piano Tiles') {
+                for(let i = tiles.length - 1; i >= 0; i--) {
+                    let tile = tiles[i];
+                    if(x >= tile.x && x <= tile.x + tileWidth && y >= tile.y && y <= tile.y + tileHeight) { tiles.splice(i, 1); gameScore += 10; break; }
+                }
+            } else if(gameType === 'Beat Archery') { arrows.push({ x: 0, y: y }); }
+        });
+        document.getElementById('game-canvas').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = e.target.getBoundingClientRect();
+            const x = touch.clientX - rect.left, y = touch.clientY - rect.top;
+            if(gameType === 'Neon Jumper') { if(gamePlayer.y >= 220) gamePlayer.vy = gameJumpPower; }
+            else if(gameType === 'Piano Tiles') {
+                for(let i = tiles.length - 1; i >= 0; i--) {
+                    let tile = tiles[i];
+                    if(x >= tile.x && x <= tile.x + tileWidth && y >= tile.y && y <= tile.y + tileHeight) { tiles.splice(i, 1); gameScore += 10; break; }
+                }
+            } else if(gameType === 'Beat Archery') { arrows.push({ x: 0, y: y }); }
+        });
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+</html>

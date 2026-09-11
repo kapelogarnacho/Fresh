@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00FFFF">
+    <title>FRESH MUSIC // HUB</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --fresh-cyan: #00f0ff;
+            --fresh-pink: #ff00aa;
+            --fresh-purple: #a855f7;
+            --dark-bg: #0a0a0a;
+            --card-bg: #141414;
+            --card-hover: #1e1e1e;
+            --text-muted: #888;
+            --border-glow: rgba(0, 240, 255, 0.15);
+            --radius: 14px;
+            --shadow-neon: 0 0 40px rgba(0, 240, 255, 0.08);
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background: var(--dark-bg);
+            color: #f0f0f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: 120px;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--fresh-cyan);
+            border-radius: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+        input,
+        textarea,
+        select {
+            font-family: inherit;
+            outline: none;
+            border: none;
+        }
+
+        /* ===== CURSOR FOLLOWER ===== */
+        .cursor-follower {
+            position: fixed;
+            pointer-events: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 240, 255, 0.2);
+            border: 1px solid var(--fresh-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: width 0.2s, height 0.2s, background 0.2s;
+            mix-blend-mode: screen;
+        }
+        .cursor-follower.active {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 0, 170, 0.15);
+            border-color: var(--fresh-pink);
+        }
+
+        /* ===== LIVE BG ===== */
+        #music-live-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: url('https://media.giphy.com/media/WZP3qaxYyoZXi/giphy.gif') center/cover;
+            opacity: 0.08;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 30% 30%, #1a001a 0%, #000 70%);
+            animation: bg-pulse-music 12s infinite alternate;
+        }
+        @keyframes bg-pulse-music {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        /* ===== TOP BAR ===== */
+        .app-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .app-header .brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .app-header .brand span {
+            font-weight: 300;
+            -webkit-text-fill-color: #fff;
+        }
+        .nav-links {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .nav-links a {
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: 0.3s;
+            color: #aaa;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #fff;
+            background: rgba(0, 240, 255, 0.08);
+            border-color: rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+        }
+        .nav-links a.active {
+            color: var(--fresh-cyan);
+            border-color: var(--fresh-cyan);
+            background: rgba(0, 240, 255, 0.1);
+        }
+        .nav-links a i {
+            font-size: 0.9rem;
+        }
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-actions .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #000;
+            cursor: pointer;
+            border: 2px solid rgba(0, 240, 255, 0.3);
+            transition: 0.3s;
+        }
+        .header-actions .avatar:hover {
+            border-color: var(--fresh-cyan);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2);
+        }
+        .notif-badge {
+            position: relative;
+            color: #aaa;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .notif-badge:hover {
+            color: var(--fresh-cyan);
+        }
+        .notif-badge .count {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: var(--fresh-pink);
+            color: #fff;
+            font-size: 0.6rem;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        /* ===== PAGE CONTAINER ===== */
+        .page-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 24px 40px;
+        }
+        .page {
+            display: none;
+            animation: fadeSlide 0.4s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeSlide {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== HOME PAGE ===== */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+        .hero-stats .stat-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 18px 16px;
+            text-align: center;
+            border: 1px solid rgba(0, 240, 255, 0.06);
+            transition: 0.3s;
+        }
+        .hero-stats .stat-card:hover {
+            border-color: rgba(0, 240, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .hero-stats .stat-card .number {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-stats .stat-card .label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 30px 0 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title i {
+            color: var(--fresh-cyan);
+        }
+        .section-title .see-all {
+            margin-left: auto;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .section-title .see-all:hover {
+            color: var(--fresh-cyan);
+        }
+
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 18px;
+        }
+        .track-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: 0.3s;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            position: relative;
+        }
+        .track-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 240, 255, 0.15);
+            box-shadow: var(--shadow-neon);
+        }
+        .track-card .art {
+            height: 170px;
+            background: #222;
+            position: relative;
+            overflow: hidden;
+        }
+        .track-card .art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+        }
+        .track-card:hover .art img {
+            transform: scale(1.08);
+            filter: brightness(0.5);
+        }
+        .track-card .art .play-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--fresh-cyan);
+            font-size: 2.8rem;
+            opacity: 0;
+            transition: 0.3s;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .track-card:hover .play-overlay {
+            opacity: 1;
+        }
+        .track-card .body {
+            padding: 12px 14px 14px;
+        }
+        .track-card .body .title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .track-card .body .artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .track-card .body .meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .track-card .body .meta i {
+            margin-right: 3px;
+        }
+        .track-card .body .meta .likes {
+            color: var(--fresh-pink);
+        }
+
+        /* ===== UPLOAD PAGE ===== */
+        .upload-zone {
+            background: var(--card-bg);
+            border: 2px dashed rgba(0, 240, 255, 0.2);
+            border-radius: var(--radius);
+            padding: 60px 30px;
+            text-align: center;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--fresh-cyan);
+            background: rgba(0, 240, 255, 0.03);
+            box-shadow: 0 0 60px rgba(0, 240, 255, 0.05);
+        }
+        .upload-zone i {
+            font-size: 4rem;
+            color: var(--fresh-cyan);
+            opacity: 0.6;
+        }
+        .upload-zone h3 {
+            margin: 12px 0 4px;
+        }
+        .upload-zone p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .upload-zone input[type="file"] {
+            display: none;
+        }
+
+        .upload-form {
+            margin-top: 24px;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px;
+            display: none;
+            border: 1px solid rgba(0, 240, 255, 0.06);
+        }
+        .upload-form.show {
+            display: block;
+            animation: fadeSlide 0.4s ease;
+        }
+        .upload-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .upload-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .upload-form .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ccc;
+        }
+        .upload-form .form-group input,
+        .upload-form .form-group select,
+        .upload-form .form-group textarea {
+            background: #1a1a1a;
+            padding: 10px 14px;
+            border-radius: 8px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+        .upload-form .form-group input:focus,
+        .upload-form .form-group select:focus,
+        .upload-form .form-group textarea:focus {
+            border-color: var(--fresh-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+        }
+        .upload-form .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+        .upload-form .form-group input[type="file"] {
+            padding: 8px;
+        }
+        .upload-form .form-group .preview-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-top: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .upload-form .form-full {
+            grid-column: 1 / -1;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            color: #000;
+            font-weight: 700;
+            padding: 12px 36px;
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: 0.3s;
+            border: none;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+        }
+        .submit-btn:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 50px rgba(0, 240, 255, 0.3);
+        }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== LIBRARY PAGE ===== */
+        .library-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .library-filters .filter-btn {
+            padding: 6px 18px;
+            border-radius: 30px;
+            background: #1a1a1a;
+            color: #aaa;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            transition: 0.3s;
+        }
+        .library-filters .filter-btn:hover,
+        .library-filters .filter-btn.active {
+            color: #fff;
+            border-color: var(--fresh-cyan);
+            background: rgba(0, 240, 255, 0.06);
+        }
+        .library-filters .filter-btn.active {
+            color: var(--fresh-cyan);
+        }
+        .library-grid .track-card .body .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        .library-grid .track-card .body .actions i {
+            cursor: pointer;
+            transition: 0.2s;
+            color: #666;
+        }
+        .library-grid .track-card .body .actions i:hover {
+            color: var(--fresh-cyan);
+        }
+        .library-grid .track-card .body .actions .fa-heart:hover {
+            color: var(--fresh-pink);
+        }
+        .library-grid .track-card .body .actions .fa-heart.liked {
+            color: var(--fresh-pink);
+        }
+        .library-grid .track-card .body .actions .fa-download:hover {
+            color: #4ade80;
+        }
+
+        .comment-section {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .comment-section .comment-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+        }
+        .comment-section .comment-input input {
+            flex: 1;
+            background: #1a1a1a;
+            padding: 6px 12px;
+            border-radius: 20px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.8rem;
+        }
+        .comment-section .comment-input input:focus {
+            border-color: var(--fresh-cyan);
+        }
+        .comment-section .comment-input button {
+            background: var(--fresh-cyan);
+            color: #000;
+            border-radius: 20px;
+            padding: 4px 16px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: 0.3s;
+        }
+        .comment-section .comment-input button:hover {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+        .comment-section .comment-list {
+            margin-top: 6px;
+            font-size: 0.8rem;
+            color: #aaa;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .comment-section .comment-list .comment-item {
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+        .comment-section .comment-list .comment-item strong {
+            color: var(--fresh-cyan);
+        }
+
+        /* ===== HUB PAGE ===== */
+        .hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 18px;
+        }
+        .hub-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .hub-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 240, 255, 0.1);
+            box-shadow: var(--shadow-neon);
+        }
+        .hub-card .icon {
+            font-size: 2.8rem;
+            color: var(--fresh-cyan);
+            opacity: 0.7;
+        }
+        .hub-card h4 {
+            margin: 10px 0 4px;
+        }
+        .hub-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .hub-card .members {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        /* ===== PROFILE PAGE ===== */
+        .profile-header {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 30px 28px;
+            border: 1px solid rgba(0, 240, 255, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .profile-header .avatar-large {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #000;
+            border: 3px solid rgba(0, 240, 255, 0.2);
+        }
+        .profile-header .info {
+            flex: 1;
+        }
+        .profile-header .info h2 {
+            font-size: 1.6rem;
+        }
+        .profile-header .info .badge {
+            display: inline-block;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-top: 4px;
+            background: linear-gradient(135deg, var(--fresh-cyan), var(--fresh-pink));
+            color: #000;
+        }
+        .profile-header .info .badge.pro {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+        .profile-header .info .badge.premium {
+            background: linear-gradient(135deg, #a855f7, #d946ef);
+            color: #fff;
+        }
+        .profile-header .stats-small {
+            display: flex;
+            gap: 24px;
+            margin-top: 8px;
+        }
+        .profile-header .stats-small div {
+            text-align: center;
+        }
+        .profile-header .stats-small .num {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        .profile-header .stats-small .lbl {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .plan-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .plan-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: 0.3s;
+        }
+        .plan-card:hover {
+            border-color: rgba(0, 240, 255, 0.1);
+        }
+        .plan-card .price {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--fresh-cyan);
+        }
+        .plan-card .price span {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        .plan-card ul {
+            list-style: none;
+            margin: 12px 0;
+            font-size: 0.85rem;
+            color: #bbb;
+        }
+        .plan-card ul li {
+            padding: 3px 0;
+        }
+        .plan-card ul li i {
+            color: var(--fresh-cyan);
+            margin-right: 6px;
+            font-size: 0.7rem;
+        }
+        .plan-card .btn-plan {
+            padding: 8px 28px;
+            border-radius: 30px;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--fresh-cyan);
+            font-weight: 600;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            transition: 0.3s;
+        }
+        .plan-card .btn-plan:hover {
+            background: var(--fresh-cyan);
+            color: #000;
+        }
+        .plan-card .btn-plan.active-plan {
+            background: var(--fresh-cyan);
+            color: #000;
+            border-color: var(--fresh-cyan);
+        }
+
+        /* ===== CHAT PAGE ===== */
+        .chat-container {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 1px solid rgba(0, 240, 255, 0.06);
+            overflow: hidden;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-container .chat-header {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .chat-container .chat-header .room-select {
+            background: #1a1a1a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 0.85rem;
+        }
+        .chat-container .chat-messages {
+            flex: 1;
+            padding: 16px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .chat-container .chat-messages .msg {
+            padding: 6px 14px;
+            border-radius: 16px;
+            max-width: 75%;
+            background: #1a1a1a;
+            font-size: 0.9rem;
+            align-self: flex-start;
+        }
+        .chat-container .chat-messages .msg.own {
+            align-self: flex-end;
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.06);
+        }
+        .chat-container .chat-messages .msg .sender {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--fresh-cyan);
+        }
+        .chat-container .chat-messages .msg .time {
+            font-size: 0.6rem;
+            color: #555;
+            margin-left: 8px;
+        }
+        .chat-container .chat-input {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            gap: 10px;
+        }
+        .chat-container .chat-input input {
+            flex: 1;
+            background: #1a1a1a;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .chat-container .chat-input input:focus {
+            border-color: var(--fresh-cyan);
+        }
+        .chat-container .chat-input button {
+            background: var(--fresh-cyan);
+            color: #000;
+            border-radius: 30px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .chat-container .chat-input button:hover {
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
+        }
+
+        /* ===== GAMES PAGE ===== */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
+        }
+        .game-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 28px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .game-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(0, 240, 255, 0.1);
+            box-shadow: var(--shadow-neon);
+        }
+        .game-card .icon {
+            font-size: 3rem;
+            color: var(--fresh-pink);
+            opacity: 0.7;
+        }
+        .game-card h4 {
+            margin: 10px 0 4px;
+        }
+        .game-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .game-card .play-btn {
+            margin-top: 12px;
+            padding: 6px 24px;
+            border-radius: 30px;
+            background: rgba(255, 0, 170, 0.1);
+            color: var(--fresh-pink);
+            border: 1px solid rgba(255, 0, 170, 0.15);
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        .game-card .play-btn:hover {
+            background: var(--fresh-pink);
+            color: #000;
+        }
+
+        /* ===== PERMANENT PLAYER ===== */
+        .permanent-player {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            background: rgba(10, 10, 10, 0.96);
+            backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(0, 240, 255, 0.08);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.8);
+        }
+        .permanent-player .p-art {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #222;
+            flex-shrink: 0;
+            margin-right: 14px;
+        }
+        .permanent-player .p-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .permanent-player .p-info {
+            flex: 1;
+            min-width: 0;
+            margin-right: 12px;
+        }
+        .permanent-player .p-info .p-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--fresh-cyan);
+        }
+        .permanent-player .p-info .p-artist {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .permanent-player .p-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 1.6rem;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .permanent-player .p-controls i {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .permanent-player .p-controls i:hover {
+            color: var(--fresh-cyan);
+            text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+        }
+        .permanent-player .p-controls .play-btn-big {
+            font-size: 2.6rem;
+            color: var(--fresh-cyan);
+        }
+        .permanent-player .p-controls .play-btn-big:hover {
+            transform: scale(1.05);
+        }
+        .permanent-player .p-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .permanent-player .p-progress .bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--fresh-cyan), var(--fresh-pink));
+            transition: width 0.2s;
+            border-radius: 0 2px 2px 0;
+        }
+        .permanent-player .p-time {
+            font-size: 0.7rem;
+            color: #666;
+            margin: 0 10px;
+            font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 8px 14px;
+            }
+            .app-header .brand {
+                font-size: 1.1rem;
+            }
+            .nav-links a {
+                font-size: 0.7rem;
+                padding: 5px 12px;
+            }
+            .nav-links a span {
+                display: none;
+            }
+            .page-container {
+                padding: 12px 14px 40px;
+            }
+            .upload-form .form-row {
+                grid-template-columns: 1fr;
+            }
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            .profile-header .stats-small {
+                justify-content: center;
+            }
+            .permanent-player {
+                height: 80px;
+                padding: 0 12px;
+            }
+            .permanent-player .p-art {
+                width: 48px;
+                height: 48px;
+                margin-right: 10px;
+            }
+            .permanent-player .p-controls {
+                font-size: 1.2rem;
+                gap: 10px;
+            }
+            .permanent-player .p-controls .play-btn-big {
+                font-size: 2rem;
+            }
+            .permanent-player .p-time {
+                display: none;
+            }
+            .track-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+            .track-card .art {
+                height: 140px;
+            }
+            .chat-container {
+                height: 380px;
+            }
+            .hero-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 480px) {
+            .nav-links a {
+                padding: 4px 10px;
+                font-size: 0.65rem;
+            }
+            .track-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .track-card .art {
+                height: 120px;
+            }
+        }
+
+        /* ===== TOAST ===== */
+        .toast-container {
+            position: fixed;
+            bottom: 110px;
+            right: 20px;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 320px;
+        }
+        .toast {
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            animation: slideInRight 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .toast.success {
+            border-color: #4ade80;
+        }
+        .toast.error {
+            border-color: #f87171;
+        }
+        .toast.info {
+            border-color: var(--fresh-cyan);
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-top: 2px solid var(--fresh-cyan);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            opacity: 0.3;
+            margin-bottom: 12px;
+        }
+        .empty-state h4 {
+            color: #ccc;
+        }
+
+        /* ===== MUSIC VIBE WAVE (visualizer placeholder) ===== */
+        .vibe-wave {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            height: 30px;
+            margin-left: 8px;
+        }
+        .vibe-wave span {
+            width: 4px;
+            background: var(--fresh-cyan);
+            border-radius: 2px;
+            animation: wave 0.8s infinite alternate ease-in-out;
+        }
+        .vibe-wave span:nth-child(1) {
+            height: 10px;
+            animation-delay: 0s;
+        }
+        .vibe-wave span:nth-child(2) {
+            height: 18px;
+            animation-delay: 0.1s;
+        }
+        .vibe-wave span:nth-child(3) {
+            height: 26px;
+            animation-delay: 0.2s;
+        }
+        .vibe-wave span:nth-child(4) {
+            height: 18px;
+            animation-delay: 0.3s;
+        }
+        .vibe-wave span:nth-child(5) {
+            height: 10px;
+            animation-delay: 0.4s;
+        }
+        @keyframes wave {
+            0% {
+                transform: scaleY(0.4);
+            }
+            100% {
+                transform: scaleY(1);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CURSOR FOLLOWER -->
+    <div class="cursor-follower" id="cursor"></div>
+
+    <!-- LIVE BG -->
+    <div id="music-live-bg"></div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ===== APP HEADER ===== -->
+    <header class="app-header">
+        <div class="brand">FRESH <span>MUSIC</span></div>
+        <nav class="nav-links" id="mainNav">
+            <a href="#" data-page="home" class="active"><i class="fa-solid fa-house"></i><span> Home</span></a>
+            <a href="#" data-page="upload"><i class="fa-solid fa-cloud-arrow-up"></i><span> Upload</span></a>
+            <a href="#" data-page="library"><i class="fa-solid fa-music"></i><span> Library</span></a>
+            <a href="#" data-page="hub"><i class="fa-solid fa-users"></i><span> Hub</span></a>
+            <a href="#" data-page="profile"><i class="fa-solid fa-user"></i><span> Profile</span></a>
+            <a href="#" data-page="chat"><i class="fa-solid fa-comment"></i><span> Chat</span></a>
+            <a href="#" data-page="games"><i class="fa-solid fa-gamepad"></i><span> Games</span></a>
+        </nav>
+        <div class="header-actions">
+            <div class="notif-badge">
+                <i class="fa-regular fa-bell"></i>
+                <span class="count">3</span>
+            </div>
+            <div class="avatar" id="avatarBtn">F</div>
+        </div>
+    </header>
+
+    <!-- ===== PAGE CONTAINER ===== -->
+    <div class="page-container">
+
+        <!-- HOME -->
+        <div class="page active" id="page-home">
+            <div class="hero-stats">
+                <div class="stat-card"><div class="number" id="statTracks">0</div><div class="label">Tracks</div></div>
+                <div class="stat-card"><div class="number" id="statUsers">42</div><div class="label">Vibers</div></div>
+                <div class="stat-card"><div class="number" id="statLikes">0</div><div class="label">Likes</div></div>
+                <div class="stat-card"><div class="number" id="statHubs">6</div><div class="label">Hubs</div></div>
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-fire"></i> Trending Tracks <span class="see-all" onclick="navigateTo('library')">See All →</span></div>
+            <div class="track-grid" id="trendingGrid"></div>
+
+            <div class="section-title"><i class="fa-solid fa-clock"></i> Recent Uploads</div>
+            <div class="track-grid" id="recentGrid"></div>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="page" id="page-upload">
+            <h2 style="margin-bottom:12px;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--fresh-cyan);"></i> Upload to the Cloud</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Drop your track and let the world vibe with it. Files are saved to your Fresh Entertainment Cloud.</p>
+
+            <div class="upload-zone" id="uploadZone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h3>Drop your track here</h3>
+                <p>or click to browse — MP3, M4A, WAV, FLAC</p>
+                <input type="file" id="audioFileInput" accept="audio/*" />
+            </div>
+
+            <div class="upload-form" id="uploadForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Track Title *</label>
+                        <input type="text" id="trackTitle" placeholder="e.g. Neon Dreams" />
+                    </div>
+                    <div class="form-group">
+                        <label>Artist *</label>
+                        <input type="text" id="trackArtist" placeholder="e.g. CyberPunkz" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Genre</label>
+                        <select id="trackGenre">
+                            <option value="Electronic">Electronic</option>
+                            <option value="Hip-Hop">Hip-Hop</option>
+                            <option value="Pop">Pop</option>
+                            <option value="Rock">Rock</option>
+                            <option value="Jazz">Jazz</option>
+                            <option value="Classical">Classical</option>
+                            <option value="Lo-Fi">Lo-Fi</option>
+                            <option value="Synthwave">Synthwave</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cover Art</label>
+                        <input type="file" id="coverInput" accept="image/*" />
+                        <img class="preview-img" id="coverPreview" style="display:none;" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-full">
+                        <label>Description</label>
+                        <textarea id="trackDesc" placeholder="Tell the vibe..." rows="2"></textarea>
+                    </div>
+                </div>
+                <button class="submit-btn" id="uploadSubmitBtn"><i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud</button>
+            </div>
+        </div>
+
+        <!-- LIBRARY -->
+        <div class="page" id="page-library">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                <h2><i class="fa-solid fa-music" style="color:var(--fresh-cyan);"></i> Your Library</h2>
+                <div class="library-filters" id="libraryFilters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="Electronic">Electronic</button>
+                    <button class="filter-btn" data-filter="Hip-Hop">Hip-Hop</button>
+                    <button class="filter-btn" data-filter="Pop">Pop</button>
+                    <button class="filter-btn" data-filter="Lo-Fi">Lo-Fi</button>
+                    <button class="filter-btn" data-filter="Synthwave">Synthwave</button>
+                </div>
+            </div>
+            <div class="track-grid library-grid" id="libraryGrid"></div>
+        </div>
+
+        <!-- HUB -->
+        <div class="page" id="page-hub">
+            <h2 style="margin-bottom:8px;"><i class="fa-solid fa-users" style="color:var(--fresh-cyan);"></i> Music Hubs</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Join a hub, connect with fellow vibers, and share the rhythm.</p>
+            <div class="hub-grid" id="hubGrid"></div>
+        </div>
+
+        <!-- PROFILE -->
+        <div class="page" id="page-profile">
+            <div class="profile-header">
+                <div class="avatar-large">F</div>
+                <div class="info">
+                    <h2>Fresh Viber</h2>
+                    <span class="badge" id="planBadge">🎵 Free</span>
+                    <div class="stats-small">
+                        <div><div class="num" id="profileTracks">0</div><div class="lbl">Uploads</div></div>
+                        <div><div class="num" id="profileLikes">0</div><div class="lbl">Likes</div></div>
+                        <div><div class="num" id="profileDownloads">0</div><div class="lbl">Downloads</div></div>
+                    </div>
+                </div>
+                <button class="submit-btn" style="padding:8px 24px;font-size:0.85rem;" onclick="navigateTo('upload')"><i class="fa-solid fa-plus"></i> Upload</button>
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-crown" style="color:#fbbf24;"></i> Pro Plans</div>
+            <div class="plan-cards" id="planCards"></div>
+        </div>
+
+        <!-- CHAT -->
+        <div class="page" id="page-chat">
+            <h2 style="margin-bottom:12px;"><i class="fa-solid fa-comment" style="color:var(--fresh-cyan);"></i> Vibe Chat</h2>
+            <div class="chat-container">
+                <div class="chat-header">
+                    <span><i class="fa-solid fa-hashtag" style="color:var(--fresh-cyan);"></i> <span id="currentRoom">general</span></span>
+                    <select class="room-select" id="chatRoomSelect">
+                        <option value="general">#general</option>
+                        <option value="electronic">#electronic</option>
+                        <option value="hiphop">#hip-hop</option>
+                        <option value="lofi">#lo-fi</option>
+                        <option value="synthwave">#synthwave</option>
+                    </select>
+                </div>
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Type a message..." />
+                    <button id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i> Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAMES -->
+        <div class="page" id="page-games">
+            <h2 style="margin-bottom:8px;"><i class="fa-solid fa-gamepad" style="color:var(--fresh-pink);"></i> Music Games</h2>
+            <p style="color:var(--text-muted);margin-bottom:20px;">Play, compete, and test your music knowledge.</p>
+            <div class="games-grid" id="gamesGrid"></div>
+        </div>
+
+    </div>
+
+    <!-- ===== PERMANENT PLAYER ===== -->
+    <div class="permanent-player" id="permanentPlayer">
+        <div class="p-progress"><div class="bar" id="progressBar"></div></div>
+        <div class="p-art"><img id="playerArt" src="https://picsum.photos/100/100?random=99" alt="art" /></div>
+        <div class="p-info">
+            <div class="p-title" id="playerTitle">Select a Track</div>
+            <div class="p-artist" id="playerArtist">Fresh Music Live</div>
+        </div>
+        <div class="p-time" id="playerTime">0:00 / 0:00</div>
+        <div class="p-controls">
+            <i class="fa-solid fa-backward-step" id="prevBtn"></i>
+            <i class="fa-solid fa-circle-play play-btn-big" id="playPauseBtn"></i>
+            <i class="fa-solid fa-forward-step" id="nextBtn"></i>
+            <i class="fa-solid fa-volume-high" id="volumeBtn" style="font-size:1.2rem;"></i>
+        </div>
+    </div>
+
+    <!-- ===== AUDIO ELEMENT (hidden) ===== -->
+    <audio id="globalAudio" style="display:none;"></audio>
+
+    <script>
+        // ============================================================
+        //  DATA LAYER — IndexedDB + in‑memory store
+        // ============================================================
+        const DB_NAME = 'FreshMusicDB';
+        const DB_VERSION = 3;
+
+        let db = null;
+        let currentUser = {
+            id: 'fresh_viber',
+            name: 'Fresh Viber',
+            plan: 'free', // 'free' | 'pro' | 'premium'
+            avatar: 'F',
+            stats: { tracks: 0, likes: 0, downloads: 0 }
+        };
+        let tracks = [];
+        let chatMessages = [];
+        let currentTrack = null;
+        let isPlaying = false;
+        let audio = document.getElementById('globalAudio');
+
+        // ===== IndexedDB helpers =====
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains('tracks')) {
+                        const store = d.createObjectStore('tracks', { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('title', 'title', { unique: false });
+                        store.createIndex('artist', 'artist', { unique: false });
+                        store.createIndex('genre', 'genre', { unique: false });
+                        store.createIndex('uploadDate', 'uploadDate', { unique: false });
+                    }
+                    if (!d.objectStoreNames.contains('chat')) {
+                        const store = d.createObjectStore('chat', { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('room', 'room', { unique: false });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                    if (!d.objectStoreNames.contains('user')) {
+                        d.createObjectStore('user', { keyPath: 'id' });
+                    }
+                };
+                req.onsuccess = (e) => { db = e.target.result;
+                    resolve(db); };
+                req.onerror = (e) => { reject(e.target.error); };
+            });
+        }
+
+        function dbAdd(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.add(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function dbPut(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.put(data);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function dbGetAll(storeName) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const req = store.getAll();
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function dbGet(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readonly');
+                const store = tx.objectStore(storeName);
+                const req = store.get(id);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        function dbDelete(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                const req = store.delete(id);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        // ===== Toast =====
+        function toast(msg, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `toast ${type}`;
+            el.textContent = msg;
+            container.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0';
+                el.style.transform = 'translateX(40px)';
+                setTimeout(() => el.remove(), 400); }, 3000);
+        }
+
+        // ===== Load / Save data =====
+        async function loadData() {
+            try {
+                const all = await dbGetAll('tracks');
+                tracks = all || [];
+                const chat = await dbGetAll('chat');
+                chatMessages = chat || [];
+                const user = await dbGet('user', currentUser.id);
+                if (user) currentUser = user;
+                updateUI();
+            } catch (e) { console.warn('Load error', e); }
+        }
+
+        async function saveTrack(track) {
+            try {
+                const id = await dbAdd('tracks', track);
+                track.id = id;
+                tracks.push(track);
+                currentUser.stats.tracks += 1;
+                await dbPut('user', currentUser);
+                updateUI();
+                toast('🎵 Track uploaded to the Cloud!', 'success');
+                return track;
+            } catch (e) { console.error(e);
+                toast('Upload failed. Try again.', 'error'); }
+        }
+
+        async function saveChat(msg) {
+            try {
+                const id = await dbAdd('chat', msg);
+                msg.id = id;
+                chatMessages.push(msg);
+                return msg;
+            } catch (e) { console.error(e); }
+        }
+
+        // ===== Generate ID =====
+        function genId() { return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6); }
+
+        // ===== Create track object =====
+        function createTrack(audioFile, title, artist, genre, desc, coverFile) {
+            const reader = new FileReader();
+            return new Promise((resolve) => {
+                const coverUrl = coverFile ? URL.createObjectURL(coverFile) : `https://picsum.photos/300/300?random=${Math
+                    .floor(Math.random()*1000)}`;
+                const audioUrl = URL.createObjectURL(audioFile);
+                const track = {
+                    id: genId(),
+                    title: title || 'Untitled',
+                    artist: artist || 'Unknown',
+                    genre: genre || 'Other',
+                    description: desc || '',
+                    coverUrl,
+                    audioUrl,
+                    audioName: audioFile.name,
+                    uploadDate: new Date().toISOString(),
+                    likes: 0,
+                    likedBy: [],
+                    comments: [],
+                    downloads: 0,
+                    duration: 0,
+                };
+                // Try to get duration
+                const tempAudio = new Audio(audioUrl);
+                tempAudio.addEventListener('loadedmetadata', () => {
+                    track.duration = tempAudio.duration;
+                    resolve(track);
+                });
+                tempAudio.addEventListener('error', () => resolve(track));
+                // fallback
+                setTimeout(() => resolve(track), 1000);
+            });
+        }
+
+        // ===== Navigation =====
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            const el = document.getElementById(`page-${page}`);
+            if (el) el.classList.add('active');
+            const link = document.querySelector(`.nav-links a[data-page="${page}"]`);
+            if (link) link.classList.add('active');
+            // Update library on nav
+            if (page === 'library') renderLibrary();
+            if (page === 'home') updateUI();
+            if (page === 'hub') renderHubs();
+            if (page === 'profile') renderProfile();
+            if (page === 'games') renderGames();
+            if (page === 'chat') renderChat();
+        }
+
+        document.querySelectorAll('.nav-links a').forEach(a => {
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateTo(a.dataset.page);
+            });
+        });
+
+        // ===== Audio Player =====
+        function playTrack(track) {
+            if (!track) return;
+            currentTrack = track;
+            audio.src = track.audioUrl;
+            audio.load();
+            audio.play().then(() => {
+                isPlaying = true;
+                updatePlayerUI();
+            }).catch(() => {
+                isPlaying = false;
+                updatePlayerUI();
+            });
+            // update player art
+            document.getElementById('playerArt').src = track.coverUrl;
+            document.getElementById('playerTitle').textContent = track.title;
+            document.getElementById('playerArtist').textContent = track.artist;
+            // store last played
+            localStorage.setItem('lastTrackId', track.id);
+        }
+
+        function togglePlay() {
+            if (!currentTrack) {
+                const all = getVisibleTracks();
+                if (all.length) playTrack(all[0]);
+                return;
+            }
+            if (isPlaying) {
+                audio.pause();
+                isPlaying = false;
+            } else {
+                audio.play().then(() => { isPlaying = true; }).catch(() => { isPlaying = false; });
+            }
+            updatePlayerUI();
+        }
+
+        function nextTrack() {
+            const all = getVisibleTracks();
+            if (!all.length) return;
+            const idx = all.findIndex(t => t.id === currentTrack?.id);
+            const next = all[(idx + 1) % all.length];
+            if (next) playTrack(next);
+        }
+
+        function prevTrack() {
+            const all = getVisibleTracks();
+            if (!all.length) return;
+            const idx = all.findIndex(t => t.id === currentTrack?.id);
+            const prev = all[(idx - 1 + all.length) % all.length];
+            if (prev) playTrack(prev);
+        }
+
+        function getVisibleTracks() {
+            // For library page, use filtered; for home, use all
+            const activePage = document.querySelector('.page.active');
+            if (activePage && activePage.id === 'page-library') {
+                const filter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+                if (filter === 'all') return tracks;
+                return tracks.filter(t => t.genre === filter);
+            }
+            return tracks;
+        }
+
+        function updatePlayerUI() {
+            const btn = document.getElementById('playPauseBtn');
+            btn.className = isPlaying ? 'fa-solid fa-circle-pause play-btn-big' : 'fa-solid fa-circle-play play-btn-big';
+        }
+
+        // Progress
+        audio.addEventListener('timeupdate', () => {
+            if (!audio.duration) return;
+            const pct = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+            document.getElementById('playerTime').textContent =
+                `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+        });
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            updatePlayerUI();
+            nextTrack();
+        });
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2,'0')}`;
+        }
+
+        // Player controls
+        document.getElementById('playPauseBtn').addEventListener('click', togglePlay);
+        document.getElementById('nextBtn').addEventListener('click', nextTrack);
+        document.getElementById('prevBtn').addEventListener('click', prevTrack);
+
+        // Volume
+        let volume = 0.8;
+        audio.volume = volume;
+        document.getElementById('volumeBtn').addEventListener('click', () => {
+            if (audio.muted) {
+                audio.muted = false;
+                audio.volume = volume || 0.8;
+                document.getElementById('volumeBtn').className = 'fa-solid fa-volume-high';
+            } else {
+                audio.muted = true;
+                document.getElementById('volumeBtn').className = 'fa-solid fa-volume-xmark';
+            }
+        });
+
+        // ===== Render Functions =====
+
+        function renderTrackCard(track, showActions = true) {
+            const liked = track.likedBy && track.likedBy.includes(currentUser.id);
+            const div = document.createElement('div');
+            div.className = 'track-card';
+            div.innerHTML = `
+            <div class="art">
+              <img src="${track.coverUrl}" alt="${track.title}" loading="lazy" />
+              <div class="play-overlay"><i class="fa-solid fa-play"></i></div>
+            </div>
+            <div class="body">
+              <div class="title">${track.title}</div>
+              <div class="artist">${track.artist}</div>
+              <div class="meta">
+                <span><i class="fa-regular fa-heart" style="color:${liked?'var(--fresh-pink)':'inherit'};"></i> ${track.likes||0}</span>
+                <span><i class="fa-regular fa-comment"></i> ${(track.comments||[]).length}</span>
+                <span><i class="fa-regular fa-clock"></i> ${track.duration ? formatTime(track.duration) : '--:--'}</span>
+              </div>
+              ${showActions ? `
+              <div class="actions">
+                <i class="fa-solid fa-play" onclick="playTrackById('${track.id}')" title="Play"></i>
+                <i class="fa-solid fa-heart ${liked?'liked':''}" onclick="toggleLike('${track.id}')" title="Like"></i>
+                <i class="fa-solid fa-download" onclick="downloadTrack('${track.id}')" title="Download"></i>
+                <i class="fa-regular fa-comment" onclick="toggleComment('${track.id}')" title="Comment"></i>
+              </div>
+              <div class="comment-section" id="commentSection_${track.id}" style="display:none;">
+                <div class="comment-input">
+                  <input type="text" placeholder="Vibe comment..." id="commentInput_${track.id}" />
+                  <button onclick="addComment('${track.id}')">Post</button>
+                </div>
+                <div class="comment-list" id="commentList_${track.id}">
+                  ${(track.comments||[]).slice(-3).map(c => `<div class="comment-item"><strong>${c.user}</strong> ${c.text}</div>`).join('')}
+                </div>
+              </div>
+              ` : ''}
+            </div>
+          `;
+            div.querySelector('.art').addEventListener('click', () => playTrackById(track.id));
+            return div;
+        }
+
+        function playTrackById(id) {
+            const track = tracks.find(t => t.id === id);
+            if (track) playTrack(track);
+        }
+
+        function toggleLike(id) {
+            const track = tracks.find(t => t.id === id);
+            if (!track) return;
+            const idx = (track.likedBy || []).indexOf(currentUser.id);
+            if (idx > -1) {
+                track.likedBy.splice(idx, 1);
+                track.likes = (track.likes || 1) - 1;
+            } else {
+                if (!track.likedBy) track.likedBy = [];
+                track.likedBy.push(currentUser.id);
+                track.likes = (track.likes || 0) + 1;
+                currentUser.stats.likes += 1;
+                dbPut('user', currentUser);
+            }
+            dbPut('tracks', track);
+            renderLibrary();
+            updateUI();
+            toast(idx > -1 ? '💔 Unliked' : '❤️ Liked!', 'info');
+        }
+
+        function downloadTrack(id) {
+            const track = tracks.find(t => t.id === id);
+            if (!track) return;
+            track.downloads = (track.downloads || 0) + 1;
+            currentUser.stats.downloads += 1;
+            dbPut('tracks', track);
+            dbPut('user', currentUser);
+            // Trigger download
+            const a = document.createElement('a');
+            a.href = track.audioUrl;
+            a.download = `${track.title} - ${track.artist}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            toast('⬇️ Download started!', 'success');
+            updateUI();
+        }
+
+        function toggleComment(id) {
+            const el = document.getElementById(`commentSection_${id}`);
+            if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addComment(id) {
+            const track = tracks.find(t => t.id === id);
+            if (!track) return;
+            const input = document.getElementById(`commentInput_${id}`);
+            if (!input || !input.value.trim()) return;
+            if (!track.comments) track.comments = [];
+            track.comments.push({ user: currentUser.name, text: input.value.trim(), time: new Date().toISOString() });
+            input.value = '';
+            dbPut('tracks', track);
+            renderLibrary();
+            toast('💬 Comment posted!', 'info');
+        }
+
+        function renderLibrary() {
+            const grid = document.getElementById('libraryGrid');
+            const filter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+            let filtered = filter === 'all' ? tracks : tracks.filter(t => t.genre === filter);
+            if (!filtered.length) {
+                grid.innerHTML =
+                    `<div class="empty-state" style="grid-column:1/-1;"><i class="fa-solid fa-music"></i><h4>No tracks in this vibe yet</h4><p>Upload your first track and start the party!</p></div>`;
+                return;
+            }
+            grid.innerHTML = '';
+            filtered.forEach(t => {
+                grid.appendChild(renderTrackCard(t, true));
+            });
+        }
+
+        function updateUI() {
+            // Stats
+            document.getElementById('statTracks').textContent = tracks.length;
+            const totalLikes = tracks.reduce((s, t) => s + (t.likes || 0), 0);
+            document.getElementById('statLikes').textContent = totalLikes;
+            document.getElementById('statUsers').textContent = 42 + tracks.length;
+
+            // Home grids
+            const trending = [...tracks].sort((a, b) => (b.likes || 0) - (a.likes || 0)).slice(0, 8);
+            const recent = [...tracks].sort((a, b) => new Date(b.uploadDate) - new Date(a.uploadDate)).slice(0, 8);
+
+            const tg = document.getElementById('trendingGrid');
+            tg.innerHTML = '';
+            trending.forEach(t => tg.appendChild(renderTrackCard(t, false)));
+
+            const rg = document.getElementById('recentGrid');
+            rg.innerHTML = '';
+            recent.forEach(t => rg.appendChild(renderTrackCard(t, false)));
+
+            // Profile
+            document.getElementById('profileTracks').textContent = currentUser.stats.tracks;
+            document.getElementById('profileLikes').textContent = currentUser.stats.likes;
+            document.getElementById('profileDownloads').textContent = currentUser.stats.downloads;
+
+            // Library
+            renderLibrary();
+        }
+
+        function renderHubs() {
+            const hubs = [
+                { name: 'Synthwave Station', icon: 'fa-solid fa-wave-square', members: 142, desc: 'Neon dreams & retro vibes' },
+                { name: 'Lo-Fi Lounge', icon: 'fa-solid fa-mug-hot', members: 98, desc: 'Chill beats for late nights' },
+                { name: 'Bass Cannon', icon: 'fa-solid fa-bolt', members: 76, desc: 'Heavy drops & subwoofer therapy' },
+                { name: 'Jazz & Soul', icon: 'fa-solid fa-saxophone', members: 54, desc: 'Smooth grooves & timeless feels' },
+                { name: 'Underground Lab', icon: 'fa-solid fa-flask', members: 33, desc: 'Experimental sounds only' },
+                { name: 'Fresh Vibes', icon: 'fa-solid fa-star', members: 210, desc: 'The main stage — everyone welcome' },
+            ];
+            const grid = document.getElementById('hubGrid');
+            grid.innerHTML = '';
+            hubs.forEach(h => {
+                const card = document.createElement('div');
+                card.className = 'hub-card';
+                card.innerHTML = `
+              <div class="icon"><i class="${h.icon}"></i></div>
+              <h4>${h.name}</h4>
+              <p>${h.desc}</p>
+              <div class="members"><i class="fa-solid fa-user"></i> ${h.members} vibers</div>
+            `;
+                card.addEventListener('click', () => {
+                    toast(`🎧 Joined ${h.name}!`, 'success');
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function renderProfile() {
+            const badge = document.getElementById('planBadge');
+            if (currentUser.plan === 'pro') badge.textContent = '⭐ Pro';
+            else if (currentUser.plan === 'premium') badge.textContent = '👑 Premium';
+            else badge.textContent = '🎵 Free';
+
+            const plans = [
+                { id: 'free', name: 'Free', price: '0', currency: '€', features: ['Upload up to 10 tracks', 'Basic library',
+                        'Join hubs', 'Listen & like'
+                    ], btn: 'Current' },
+                { id: 'pro', name: 'Pro', price: '9.99', currency: '€', features: ['Unlimited uploads', 'Pro badge',
+                        'Advanced stats', 'Priority support', 'Exclusive hubs'
+                    ], btn: 'Upgrade' },
+                { id: 'premium', name: 'Premium', price: '19.99', currency: '€', features: ['All Pro features',
+                        'Early access', 'Custom cover art', 'Verified badge', 'Live sessions', 'Download all tracks'
+                    ], btn: 'Upgrade' },
+            ];
+            const grid = document.getElementById('planCards');
+            grid.innerHTML = '';
+            plans.forEach(p => {
+                const active = currentUser.plan === p.id;
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                card.innerHTML = `
+              <h3>${p.name}</h3>
+              <div class="price">${p.price}<span>${p.currency}/mo</span></div>
+              <ul>${p.features.map(f => `<li><i class="fa-solid fa-check"></i> ${f}</li>`).join('')}</ul>
+              <button class="btn-plan ${active?'active-plan':''}" ${active?'disabled':''}>${active ? '✓ Active' : p.btn}</button>
+            `;
+                const btn = card.querySelector('.btn-plan');
+                if (!active) {
+                    btn.addEventListener('click', () => {
+                        currentUser.plan = p.id;
+                        dbPut('user', currentUser);
+                        renderProfile();
+                        toast(`✨ Upgraded to ${p.name}!`, 'success');
+                    });
+                }
+                grid.appendChild(card);
+            });
+        }
+
+        function renderGames() {
+            const games = [
+                { name: 'Rhythm Tap', icon: 'fa-solid fa-hand-pointer', desc: 'Tap to the beat and score big!' },
+                { name: 'Guess the Track', icon: 'fa-solid fa-ear-listen', desc: 'Listen to snippets and name the song' },
+                { name: 'Music Trivia', icon: 'fa-solid fa-brain', desc: 'Test your music knowledge' },
+                { name: 'Beat Maker', icon: 'fa-solid fa-drum', desc: 'Create your own beat loop' },
+                { name: 'Vibe Match', icon: 'fa-solid fa-heart', desc: 'Match the mood with the track' },
+                { name: 'DJ Battle', icon: 'fa-solid fa-crosshairs', desc: 'Compete in the mix challenge' },
+            ];
+            const grid = document.getElementById('gamesGrid');
+            grid.innerHTML = '';
+            games.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+              <div class="icon"><i class="${g.icon}"></i></div>
+              <h4>${g.name}</h4>
+              <p>${g.desc}</p>
+              <button class="play-btn">Play</button>
+            `;
+                card.querySelector('.play-btn').addEventListener('click', () => {
+                    toast(`🎮 Launching ${g.name}...`, 'info');
+                });
+                grid.appendChild(card);
+            });
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chatMessages');
+            const room = document.getElementById('chatRoomSelect').value;
+            const msgs = chatMessages.filter(m => m.room === room).slice(-30);
+            container.innerHTML = '';
+            msgs.forEach(m => {
+                const div = document.createElement('div');
+                div.className = `msg ${m.userId === currentUser.id ? 'own' : ''}`;
+                div.innerHTML =
+                    `<span class="sender">${m.user}</span> ${m.text} <span class="time">${new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // ===== Chat =====
+        document.getElementById('chatSendBtn').addEventListener('click', sendChat);
+        document.getElementById('chatInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChat(); });
+        document.getElementById('chatRoomSelect').addEventListener('change', renderChat);
+
+        async function sendChat() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const room = document.getElementById('chatRoomSelect').value;
+            const msg = {
+                userId: currentUser.id,
+                user: currentUser.name,
+                room,
+                text,
+                timestamp: new Date().toISOString(),
+            };
+            await saveChat(msg);
+            input.value = '';
+            renderChat();
+        }
+
+        // ===== Upload =====
+        const uploadZone = document.getElementById('uploadZone');
+        const audioInput = document.getElementById('audioFileInput');
+        const coverInput = document.getElementById('coverInput');
+        const coverPreview = document.getElementById('coverPreview');
+        const uploadForm = document.getElementById('uploadForm');
+        const uploadBtn = document.getElementById('uploadSubmitBtn');
+
+        let selectedAudio = null;
+        let selectedCover = null;
+
+        uploadZone.addEventListener('click', () => audioInput.click());
+        audioInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                selectedAudio = e.target.files[0];
+                uploadForm.classList.add('show');
+                toast(`📁 ${selectedAudio.name} selected`, 'info');
+            }
+        });
+
+        // Drag & drop
+        uploadZone.addEventListener('dragover', (e) => { e.preventDefault();
+            uploadZone.classList.add('dragover'); });
+        uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                const f = e.dataTransfer.files[0];
+                if (f.type.startsWith('audio/')) {
+                    selectedAudio = f;
+                    audioInput.files = e.dataTransfer.files;
+                    uploadForm.classList.add('show');
+                    toast(`📁 ${f.name} dropped!`, 'info');
+                } else {
+                    toast('Please drop an audio file.', 'error');
+                }
+            }
+        });
+
+        coverInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                selectedCover = e.target.files[0];
+                const url = URL.createObjectURL(selectedCover);
+                coverPreview.src = url;
+                coverPreview.style.display = 'block';
+            }
+        });
+
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedAudio) { toast('Please select an audio file.', 'error'); return; }
+            const title = document.getElementById('trackTitle').value.trim() || 'Untitled';
+            const artist = document.getElementById('trackArtist').value.trim() || 'Unknown';
+            const genre = document.getElementById('trackGenre').value;
+            const desc = document.getElementById('trackDesc').value.trim();
+
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+
+            try {
+                const track = await createTrack(selectedAudio, title, artist, genre, desc, selectedCover);
+                await saveTrack(track);
+                // reset form
+                uploadForm.classList.remove('show');
+                document.getElementById('trackTitle').value = '';
+                document.getElementById('trackArtist').value = '';
+                document.getElementById('trackDesc').value = '';
+                coverPreview.style.display = 'none';
+                selectedAudio = null;
+                selectedCover = null;
+                audioInput.value = '';
+                coverInput.value = '';
+                // play it
+                playTrack(track);
+                navigateTo('library');
+            } catch (e) {
+                toast('Upload error. Try again.', 'error');
+                console.error(e);
+            }
+            uploadBtn.disabled = false;
+            uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload to Cloud';
+        });
+
+        // ===== Filter buttons =====
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderLibrary();
+            });
+        });
+
+        // ===== Keyboard shortcuts =====
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.code === 'Space') { e.preventDefault();
+                togglePlay(); }
+            if (e.code === 'ArrowRight') { e.preventDefault();
+                nextTrack(); }
+            if (e.code === 'ArrowLeft') { e.preventDefault();
+                prevTrack(); }
+        });
+
+        // ===== Init =====
+        async function init() {
+            await openDB();
+            await loadData();
+            // Restore last played
+            const lastId = localStorage.getItem('lastTrackId');
+            if (lastId) {
+                const t = tracks.find(t => t.id === lastId);
+                if (t) playTrack(t);
+            }
+            renderHubs();
+            renderProfile();
+            renderGames();
+            renderChat();
+            updateUI();
+            // Auto-play first track if none
+            if (!currentTrack && tracks.length) {
+                playTrack(tracks[0]);
+            }
+            // cursor
+            const cursor = document.getElementById('cursor');
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            });
+            document.querySelectorAll('button, a, .track-card, .hub-card, .game-card').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('active'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+            });
+            toast('🎧 Welcome to Fresh Music Hub!', 'info');
+        }
+
+        init().catch(console.error);
+
+        // ===== Expose for inline onclick =====
+        window.playTrackById = playTrackById;
+        window.toggleLike = toggleLike;
+        window.downloadTrack = downloadTrack;
+        window.toggleComment = toggleComment;
+        window.addComment = addComment;
+        window.navigateTo = navigateTo;
+        window.togglePlay = togglePlay;
+        window.nextTrack = nextTrack;
+        window.prevTrack = prevTrack;
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+</html>

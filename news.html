@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fresh Entertainment - The Daily Wire</title>
+    <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00FFFF">
+    <style>
+        /* --- VINTAGE THEME VARIABLES --- */
+        :root {
+            /* Typography Scale */
+            --base-font-size: 16px;
+            
+            /* Default Vintage Lite */
+            --bg-paper: #F4EAD5;
+            --text-ink: #2C241B;
+            --accent-sepia: #5D4037;
+            --accent-light: #8D6E63;
+            --border-ornate: 3px double #795548;
+            --border-faded: 1px solid #A69886;
+            --media-filter: sepia(0.6) contrast(1.1);
+        }
+
+        /* Dark Mode / Noir Theme */
+        [data-theme="dark"] {
+            --bg-paper: #1A1612;
+            --text-ink: #D4C5B0;
+            --accent-sepia: #8D6E63;
+            --accent-light: #6E5C4F;
+            --border-ornate: 3px double #A69886;
+            --border-faded: 1px solid #4A3F35;
+            --media-filter: grayscale(0.8) contrast(1.2);
+        }
+
+        /* Aged Archival Theme */
+        [data-theme="archival"] {
+            --bg-paper: #E0CFA4;
+            --text-ink: #30261A;
+            --accent-sepia: #4A3022;
+            --accent-light: #705340;
+            --border-ornate: 3px double #4A3022;
+            --border-faded: 1px solid #8C7B61;
+            --media-filter: sepia(0.8) contrast(1.3);
+        }
+
+        /* --- GLOBAL STYLES & TEXTURE --- */
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-ink);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: var(--base-font-size);
+            margin: 0;
+            padding: 0;
+            /* Subtle distressing using CSS gradients */
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.05) 100%),
+                url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.05"/%3E%3C/svg%3E');
+            line-height: 1.6;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- HEADER & BANNER --- */
+        header {
+            text-align: center;
+            border-bottom: var(--border-ornate);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        h1.site-title {
+            font-size: 3.5rem;
+            margin: 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-ink);
+            font-weight: normal;
+        }
+
+        /* Points are now hidden visually but active in DOM for logic */
+        .points-system {
+            display: none;
+        }
+
+        .news-banner {
+            background-color: var(--accent-sepia);
+            color: var(--bg-paper);
+            padding: 8px 0;
+            font-style: italic;
+            overflow: hidden;
+            white-space: nowrap;
+            border-top: 1px solid var(--text-ink);
+            border-bottom: 1px solid var(--text-ink);
+        }
+
+        .news-banner span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 25s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        nav button {
+            background: transparent;
+            border: var(--border-faded);
+            color: var(--text-ink);
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        nav button:hover, nav button.active {
+            background: var(--accent-sepia);
+            color: var(--bg-paper);
+        }
+
+        /* --- SECTIONS --- */
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .tab-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* News Layout */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .article-card {
+            border: var(--border-faded);
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+        }
+
+        .article-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-sepia);
+        }
+
+        .article-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            filter: var(--media-filter);
+            border-bottom: 1px solid var(--accent-sepia);
+            margin-bottom: 10px;
+        }
+
+        .source-tag {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 10px;
+            background: var(--text-ink);
+            color: var(--bg-paper);
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.8;
+        }
+
+        /* Forms (Editor, Chat & Dashboard) */
+        .vintage-form {
+            max-width: 600px;
+            margin: 0 auto;
+            border: var(--border-ornate);
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .vintage-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .vintage-form input[type="text"],
+        .vintage-form select,
+        .vintage-form textarea,
+        .vintage-form input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: transparent;
+            border: var(--border-faded);
+            font-family: inherit;
+            color: var(--text-ink);
+            box-sizing: border-box;
+        }
+
+        /* User Media Grid */
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .media-item {
+            position: relative;
+            border: 4px solid var(--bg-paper); 
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            filter: var(--media-filter);
+        }
+
+        .media-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .media-item .caption {
+            background: var(--bg-paper);
+            color: var(--text-ink);
+            padding: 8px;
+            font-size: 0.85rem;
+            font-style: italic;
+            text-align: center;
+            border-top: 1px solid var(--border-faded);
+        }
+
+        /* Community Chat (Telegraph Wire) */
+        .chat-display {
+            height: 300px;
+            overflow-y: auto;
+            border: var(--border-faded);
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            border-bottom: 1px dashed var(--accent-light);
+            padding-bottom: 5px;
+        }
+
+        .chat-message .author {
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            color: var(--accent-sepia);
+        }
+
+        /* Article Modal Extension */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-paper);
+            color: var(--text-ink);
+            border: var(--border-ornate);
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-ink);
+            cursor: pointer;
+        }
+
+        .modal-body img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            filter: var(--media-filter);
+            border: var(--border-faded);
+            margin: 20px 0;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: var(--border-ornate);
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NEWS BANNER -->
+    <div class="news-banner">
+        <span>LATEST DISPATCHES: Global markets fluctuate amidst new trade treaties &mdash; Local authorities announce city-wide architectural renewal &mdash; Weather remains unseasonably mild &mdash; </span>
+    </div>
+
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div class="points-system" id="pointsDisplay">
+                Citizenship Points: <strong>0</strong>
+            </div>
+            <h1 class="site-title">Fresh Entertainment</h1>
+            <p style="font-style: italic; color: var(--accent-light);">The Premier Station for Veracious Reporting & Curated Media</p>
+            
+            <nav>
+                <button class="nav-btn active" onclick="openTab('news')">Front Page</button>
+                <button class="nav-btn" onclick="openTab('chat')">Telegraph Wire</button>
+                <button class="nav-btn" onclick="openTab('media')">User Media</button>
+                <button class="nav-btn" onclick="openTab('editor')">Editor's Desk</button>
+                <button class="nav-btn" onclick="openTab('dashboard')">Settings Dashboard</button>
+            </nav>
+        </header>
+
+        <!-- TAB: FRONT PAGE (NEWS) -->
+        <section id="news" class="tab-section active">
+            <h2 style="text-align: center; border-bottom: 1px solid var(--accent-light); padding-bottom: 10px;">Today's Top Stories</h2>
+            <div class="news-grid" id="newsFeed">
+                <!-- Article 1 -->
+                <article class="article-card">
+                    <span class="source-tag">Source: Associated Press Wire</span>
+                    <img src="https://images.unsplash.com/photo-1585829365295-ab7cd400c167?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="News Image">
+                    <h3 class="article-title">Historic Treaty Signed in Capital</h3>
+                    <p class="article-excerpt">Diplomats gathered this morning to formalize the new trade agreement, promising unprecedented economic cooperation...</p>
+                    <div class="full-content" style="display:none;">
+                        Diplomats gathered this morning to formalize the new trade agreement, promising unprecedented economic cooperation across the territories. The signing took place in the grand hall, surrounded by press and dignitaries. Experts suggest this treaty will open up supply lines that have been restricted for nearly a decade, ushering in a new era of prosperity for the working class.
+                    </div>
+                    <button class="btn-action" onclick="expandArticle(this)">Read Full Story</button>
+                </article>
+
+                <!-- Article 2 -->
+                <article class="article-card">
+                    <span class="source-tag">Source: Reuters Archival</span>
+                    <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Newspaper stack">
+                    <h3 class="article-title">Advancements in the Printing Press</h3>
+                    <p class="article-excerpt">Local inventors demonstrate a rapid new method of typesetting, threatening to revolutionize the morning editions...</p>
+                    <div class="full-content" style="display:none;">
+                        Local inventors demonstrate a rapid new method of typesetting, threatening to revolutionize the morning editions. The newly unveiled mechanized press operates at three times the speed of traditional manual blocks. While newspaper proprietors are thrilled at the reduced labor costs, guilds have expressed deep concern regarding the future of their artisanal trade.
+                    </div>
+                    <button class="btn-action" onclick="expandArticle(this)">Read Full Story</button>
+                </article>
+
+                <!-- Article 3 -->
+                <article class="article-card">
+                    <span class="source-tag">Source: Local Station</span>
+                    <img src="https://images.unsplash.com/photo-1572949645841-094f3a9c4c94?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Vintage camera">
+                    <h3 class="article-title">Cinematograph Exhibition Opens</h3>
+                    <p class="article-excerpt">The highly anticipated moving picture exhibition opened its doors to a fascinated public last evening...</p>
+                    <div class="full-content" style="display:none;">
+                        The highly anticipated moving picture exhibition opened its doors to a fascinated public last evening. Attendees gasped as projected locomotives appeared to charge directly toward the seating arrangements. The exhibition, running through the fortnight, showcases short features capturing everyday street scenes, comedic sketches, and grand landscapes from foreign continents.
+                    </div>
+                    <button class="btn-action" onclick="expandArticle(this)">Read Full Story</button>
+                </article>
+            </div>
+        </section>
+
+        <!-- TAB: TELEGRAPH WIRE (CHAT) -->
+        <section id="chat" class="tab-section">
+            <h2 style="text-align: center;">The Telegraph Wire</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Connect with fellow readers across the network.</p>
+            <div class="vintage-form" style="max-width: 800px;">
+                <div class="chat-display" id="chatDisplay">
+                    <div class="chat-message">
+                        <div class="author">Fresh Ent Editor [System]</div>
+                        <div class="msg">Welcome to the Telegraph Wire. Please maintain proper decorum during transmissions. STOP.</div>
+                    </div>
+                </div>
+                <form onsubmit="handleChatSubmit(event)">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="chatInput" placeholder="Draft your message here..." required style="margin-bottom: 0;">
+                        <button type="submit" class="btn-action" style="margin-top: 0;">Transmit</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB: USER MEDIA INTEGRATION -->
+        <section id="media" class="tab-section">
+            <h2 style="text-align: center;">Public Contributions</h2>
+            <p style="text-align: center; margin-bottom: 30px;">Photographs and moving pictures submitted by our esteemed readership.</p>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn-action" onclick="earnPoints(25); alert('File browser would open here.')">Upload Photograph</button>
+            </div>
+
+            <div class="media-gallery">
+                <div class="media-item">
+                    <img src="https://images.unsplash.com/photo-1551024506-0bc97380bb4c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="User Photo">
+                    <div class="caption">"Downtown Stroll" - A. Smith</div>
+                </div>
+                <div class="media-item">
+                    <img src="https://images.unsplash.com/photo-1514302058781-817ab553a005?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="User Photo">
+                    <div class="caption">"The Old Clocktower" - E. Jones</div>
+                </div>
+                <div class="media-item">
+                    <img src="https://images.unsplash.com/photo-1478147424040-592f6b32810a?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="User Photo">
+                    <div class="caption">"Morning Commute" - M. Davies</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: EDITOR'S DESK -->
+        <section id="editor" class="tab-section">
+            <h2 style="text-align: center;">The Editor's Desk</h2>
+            <div class="vintage-form">
+                <form onsubmit="handlePublish(event)">
+                    <label for="newsTitle">Headline</label>
+                    <input type="text" id="newsTitle" placeholder="Enter a captivating headline..." required>
+
+                    <label for="newsSource">Dispatch Source</label>
+                    <select id="newsSource">
+                        <option value="Independent Contributor">Independent Contributor</option>
+                        <option value="Associated Press">Associated Press</option>
+                        <option value="Reuters">Reuters</option>
+                        <option value="Local Bureau">Local Bureau</option>
+                    </select>
+
+                    <label for="newsContent">Article Copy (Full Text)</label>
+                    <textarea id="newsContent" rows="6" placeholder="Draft your full article here..." required></textarea>
+
+                    <button type="submit" class="btn-action">Publish & View Live</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- TAB: SETTINGS DASHBOARD -->
+        <section id="dashboard" class="tab-section">
+            <h2 style="text-align: center;">User Preferences</h2>
+            <div class="vintage-form">
+                <form onsubmit="savePreferences(event)">
+                    
+                    <h3 style="border-bottom: 1px solid var(--accent-light); padding-bottom: 5px;">Aesthetics & Reading</h3>
+                    
+                    <label for="themeSelect">Visual Theme</label>
+                    <select id="themeSelect">
+                        <option value="light">Classic Newsprint (Lite)</option>
+                        <option value="dark">Midnight Noir (Dark Mode)</option>
+                        <option value="archival">Aged Archival</option>
+                    </select>
+
+                    <label for="fontSizeSlider">Typography Size Increase</label>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+                        <span style="font-size: 14px;">A</span>
+                        <input type="range" id="fontSizeSlider" min="14" max="24" value="16" style="margin-bottom: 0;">
+                        <span style="font-size: 24px;">A</span>
+                    </div>
+
+                    <label for="fontPreference">Typeface Style</label>
+                    <select id="fontPreference">
+                        <option value="'Georgia', 'Times New Roman', serif">Standard Serif</option>
+                        <option value="'Courier New', Courier, monospace">Typewriter</option>
+                    </select>
+
+                    <h3 style="border-bottom: 1px solid var(--accent-light); padding-bottom: 5px; margin-top: 30px;">Notifications</h3>
+
+                    <label>Edition Delivery</label>
+                    <div style="margin-bottom: 20px;">
+                        <input type="checkbox" id="notifMorning" checked> Morning Edition<br>
+                        <input type="checkbox" id="notifEvening"> Evening Telegraphs<br>
+                        <input type="checkbox" id="notifBreaking" checked> Urgent Bulletins
+                    </div>
+
+                    <button type="submit" class="btn-action">Apply & Save Archive Preferences</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            @fresh_ent
+        </footer>
+    </div>
+
+    <!-- ARTICLE EXTENSION MODAL -->
+    <div id="articleModal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">&times;</button>
+            <span class="source-tag" id="modalSource" style="margin-top: 10px;"></span>
+            <h2 id="modalTitle" style="font-size: 2.5rem; margin-top: 5px;"></h2>
+            <img id="modalImg" src="" alt="Article Image">
+            <div id="modalBody" style="font-size: 1.1em; line-height: 1.8;"></div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT FOR LOGIC -->
+    <script>
+        // Points System Logic (Now running quietly in the background)
+        let userPoints = 0;
+
+        function earnPoints(amount) {
+            userPoints += amount;
+            document.getElementById('pointsDisplay').innerHTML = `Citizenship Points: <strong>${userPoints}</strong>`;
+            console.log(`Earned ${amount} points. Background total: ${userPoints}`);
+        }
+
+        // Tab Navigation Logic
+        function openTab(tabId) {
+            const sections = document.querySelectorAll('.tab-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            const btns = document.querySelectorAll('.nav-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            
+            // Find and activate the matching button
+            const activeBtn = Array.from(btns).find(btn => btn.getAttribute('onclick').includes(tabId));
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Editor Publish Logic (Now prepends post and redirects to view it)
+        function handlePublish(event) {
+            event.preventDefault();
+            earnPoints(50); // Silent background tracking
+            
+            const title = document.getElementById('newsTitle').value;
+            const source = document.getElementById('newsSource').value;
+            const content = document.getElementById('newsContent').value;
+            const excerpt = content.substring(0, 100) + "...";
+            
+            // Create new article card HTML
+            const newArticleHTML = `
+                <article class="article-card">
+                    <span class="source-tag">Source: ${source}</span>
+                    <img src="https://images.unsplash.com/photo-1505664194779-8beaceb93744?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Default Typewriter Image">
+                    <h3 class="article-title">${title}</h3>
+                    <p class="article-excerpt">${excerpt}</p>
+                    <div class="full-content" style="display:none;">${content}</div>
+                    <button class="btn-action" onclick="expandArticle(this)">Read Full Story</button>
+                </article>
+            `;
+
+            // Prepend to front page
+            const feed = document.getElementById('newsFeed');
+            feed.insertAdjacentHTML('afterbegin', newArticleHTML);
+
+            // Clear form
+            document.getElementById('newsTitle').value = '';
+            document.getElementById('newsContent').value = '';
+
+            // Redirect to view the post
+            openTab('news');
+        }
+
+        // Community Chat Logic
+        function handleChatSubmit(event) {
+            event.preventDefault();
+            earnPoints(5); // Silent tracking for activity
+            
+            const input = document.getElementById('chatInput');
+            const msgText = input.value;
+            if(!msgText) return;
+
+            const chatDisplay = document.getElementById('chatDisplay');
+            
+            const newMsg = document.createElement('div');
+            newMsg.className = 'chat-message';
+            newMsg.innerHTML = `<div class="author">Local Reader</div><div class="msg">${msgText}</div>`;
+            
+            chatDisplay.appendChild(newMsg);
+            chatDisplay.scrollTop = chatDisplay.scrollHeight; // Auto-scroll to bottom
+            
+            input.value = '';
+        }
+
+        // Settings Dashboard Logic (Themes, Dark Mode, Font Size)
+        function savePreferences(event) {
+            event.preventDefault();
+            
+            // Handle Theme
+            const theme = document.getElementById('themeSelect').value;
+            document.documentElement.setAttribute('data-theme', theme);
+
+            // Handle Font Size
+            const size = document.getElementById('fontSizeSlider').value;
+            document.documentElement.style.setProperty('--base-font-size', size + 'px');
+
+            // Handle Typeface
+            const typeface = document.getElementById('fontPreference').value;
+            document.body.style.fontFamily = typeface;
+
+            // Flash visual confirmation inside the form
+            const btn = event.target.querySelector('.btn-action');
+            const originalText = btn.innerText;
+            btn.innerText = "Settings Applied!";
+            setTimeout(() => { btn.innerText = originalText; }, 2000);
+        }
+
+        // Article Modal Extension Logic
+        function expandArticle(btnElement) {
+            earnPoints(10); // Silent tracking for reading
+            
+            const card = btnElement.closest('.article-card');
+            
+            // Extract data from the card
+            const source = card.querySelector('.source-tag').innerText;
+            const title = card.querySelector('.article-title').innerText;
+            const imgSrc = card.querySelector('img').src;
+            const fullContent = card.querySelector('.full-content').innerHTML;
+
+            // Populate Modal
+            document.getElementById('modalSource').innerText = source;
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalImg').src = imgSrc;
+            document.getElementById('modalBody').innerHTML = fullContent;
+
+            // Show Modal
+            document.getElementById('articleModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('articleModal').style.display = 'none';
+        }
+
+        // Close modal if clicking outside the content area
+        document.getElementById('articleModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VillageHub — Decentralized Community Toolkit</title>
+    <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00FFFF">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0e1217;
+            color: #e5e9f0;
+        }
+        :root {
+            --accent: #f472b6; /* pinkish feminine accent */
+            --accent-dark: #d9534f;
+            --dark-card: #1a1d29;
+            --dark-border: #2c3040;
+            --dark-hover: #252a38;
+            --bg: #0e1217;
+        }
+
+        /* ---- Decentralized Banner ---- */
+        .decentralized-banner {
+            background: linear-gradient(135deg, #2b2f4d, #1a1d29);
+            border-bottom: 2px solid var(--accent);
+            padding: 15px 25px;
+            text-align: center;
+            font-size: 14px;
+            color: #d0d5e8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .decentralized-banner i {
+            color: var(--accent);
+            font-size: 20px;
+        }
+        .decentralized-banner strong {
+            color: #fff;
+            background: rgba(244,114,182,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 0 8px;
+        }
+
+        /* ---- Sticky Top Navigation (Female Avatars) ---- */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #111420;
+            border-bottom: 1px solid var(--dark-border);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .top-nav .logo {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+            margin-right: 20px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all .25s ease;
+            flex-shrink: 0;
+        }
+        .nav-btn .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #1a1d29;
+            border: 2px solid var(--dark-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all .3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-btn .avatar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transition: transform .3s;
+        }
+        .nav-btn:hover .avatar,
+        .nav-btn.active .avatar {
+            border-color: var(--accent);
+            background: #2b2f4d;
+            box-shadow: 0 4px 15px rgba(244,114,182,0.4);
+        }
+        .nav-btn:hover .avatar::after,
+        .nav-btn.active .avatar::after {
+            transform: scaleX(1);
+        }
+        .nav-btn .nav-text {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: #1a1d29;
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all .2s;
+            margin-top: 6px;
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        .nav-btn:hover .nav-text,
+        .nav-btn.active .nav-text {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        /* ---- Main Content ---- */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .tool-section {
+            margin-bottom: 50px;
+            background: #151928;
+            border-radius: 20px;
+            border: 1px solid var(--dark-border);
+            padding: 30px;
+            scroll-margin-top: 90px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .tool-section h2 {
+            font-size: 24px;
+            color: var(--accent);
+            border-bottom: 2px solid var(--dark-border);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card {
+            background: var(--dark-card);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid var(--dark-border);
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            background: var(--dark-hover);
+            color: #e0e5f0;
+            transition: .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            background: #2f3545;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(244,114,182,0.3);
+        }
+        .btn-primary:hover {
+            background: #d9534f;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--dark-border);
+            color: #a0a8bd;
+        }
+
+        /* Camera */
+        .camera-viewport {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            max-width: 850px;
+            margin: 0 auto 15px;
+        }
+        .camera-viewport video {
+            width: 100%;
+            height: 480px;
+            object-fit: cover;
+        }
+        .camera-grid {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: none;
+            background:
+                linear-gradient(90deg, rgba(255,255,255,0.25) 1px, transparent 1px),
+                linear-gradient(rgba(255,255,255,0.25) 1px, transparent 1px);
+            background-size: 33.33% 33.33%;
+        }
+        .camera-grid.show { display: block; }
+
+        /* Video Editor */
+        .video-editor-layout {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 20px;
+        }
+        .timeline-track {
+            display: flex;
+            gap: 5px;
+            height: 40px;
+            background: #0d1019;
+            border-radius: 8px;
+            padding: 0 5px;
+        }
+        .timeline-clip {
+            background: linear-gradient(135deg, var(--accent), #4a9df8);
+            border-radius: 5px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .tool-panel {
+            background: var(--dark-card);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--dark-border);
+        }
+
+        /* Audio */
+        .audio-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .graph-box canvas {
+            width: 100%;
+            height: 160px;
+            background: #0e1217;
+            border-radius: 8px;
+        }
+
+        /* QR */
+        .qr-container video {
+            width: 100%;
+            border-radius: 14px;
+        }
+
+        /* Chat & Post */
+        .chat-box {
+            height: 250px;
+            overflow-y: auto;
+            background: #1a1d29;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid var(--dark-border);
+        }
+        .post-wall {
+            display: grid;
+            gap: 15px;
+        }
+        .post-item {
+            background: var(--dark-card);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--dark-border);
+        }
+        .post-item .post-author {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Notepad */
+        .notepad-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            background: #1c2030;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+            z-index: 9999;
+            border: 1px solid var(--dark-border);
+            user-select: none;
+        }
+        .notepad-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #141722;
+            cursor: move;
+            border-bottom: 1px solid var(--dark-border);
+        }
+        .notepad-body textarea {
+            width: 100%;
+            height: 120px;
+            background: #0e1217;
+            border: 1px solid var(--dark-border);
+            border-radius: 10px;
+            color: #fff;
+            padding: 12px;
+            resize: vertical;
+        }
+
+        .mini-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .mini-card {
+            background: #1a1d29;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid var(--dark-border);
+        }
+
+        @media (max-width: 768px) {
+            .video-editor-layout, .audio-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Decentralized Banner -->
+    <div class="decentralized-banner">
+        <i class="fas fa-shield-halved"></i>
+        <span>🌐 <strong>Purely Decentralized</strong> — All data stays on your device. No servers, no tracking, no fees. Every tool is <strong>free to use & post</strong>.</span>
+        <i class="fas fa-lock-open"></i>
+    </div>
+
+    <!-- Top Navigation with Female Avatars -->
+    <nav class="top-nav">
+        <span class="logo"><i class="fas fa-home"></i> Village<span style="color:var(--accent)">Hub</span></span>
+        <a href="#camera" class="nav-btn active" data-tool="camera">
+            <span class="avatar">👩</span>
+            <span class="nav-text">Camera</span>
+        </a>
+        <a href="#video" class="nav-btn" data-tool="video">
+            <span class="avatar">👩‍💻</span>
+            <span class="nav-text">Video Editor</span>
+        </a>
+        <a href="#audio" class="nav-btn" data-tool="audio">
+            <span class="avatar">👩‍🎤</span>
+            <span class="nav-text">Audio Lab</span>
+        </a>
+        <a href="#qr" class="nav-btn" data-tool="qr">
+            <span class="avatar">👩‍🔬</span>
+            <span class="nav-text">QR Scanner</span>
+        </a>
+        <a href="#findit" class="nav-btn" data-tool="findit">
+            <span class="avatar">👩‍🏫</span>
+            <span class="nav-text">Find It</span>
+        </a>
+        <a href="#files" class="nav-btn" data-tool="files">
+            <span class="avatar">👩‍💼</span>
+            <span class="nav-text">Share Files</span>
+        </a>
+        <a href="#social" class="nav-btn" data-tool="social">
+            <span class="avatar">👩‍💻</span>
+            <span class="nav-text">Social</span>
+        </a>
+        <a href="#community" class="nav-btn" data-tool="community">
+            <span class="avatar">👩‍🤝‍👩</span>
+            <span class="nav-text">Community</span>
+        </a>
+        <a href="#events" class="nav-btn" data-tool="events">
+            <span class="avatar">👩‍🎓</span>
+            <span class="nav-text">Events</span>
+        </a>
+        <a href="#todo" class="nav-btn" data-tool="todo">
+            <span class="avatar">👩‍🌾</span>
+            <span class="nav-text">To-Do</span>
+        </a>
+        <a href="#bible" class="nav-btn" data-tool="bible">
+            <span class="avatar">👩‍⚕️</span>
+            <span class="nav-text">Bible</span>
+        </a>
+        <a href="#products" class="nav-btn" data-tool="products">
+            <span class="avatar">👩‍🍳</span>
+            <span class="nav-text">Products</span>
+        </a>
+        <a href="#channels" class="nav-btn" data-tool="channels">
+            <span class="avatar">👩‍🎨</span>
+            <span class="nav-text">Channels</span>
+        </a>
+        <a href="#content" class="nav-btn" data-tool="content">
+            <span class="avatar">👩‍💻</span>
+            <span class="nav-text">Content</span>
+        </a>
+        <a href="#briefing" class="nav-btn" data-tool="briefing">
+            <span class="avatar">👩‍🚀</span>
+            <span class="nav-text">Briefing</span>
+        </a>
+        <a href="#shorts" class="nav-btn" data-tool="shorts">
+            <span class="avatar">👩‍🎤</span>
+            <span class="nav-text">Shorts</span>
+        </a>
+        <a href="#postwall" class="nav-btn" data-tool="postwall">
+            <span class="avatar">👩‍💬</span>
+            <span class="nav-text">Post Wall</span>
+        </a>
+    </nav>
+
+    <main class="main-content">
+
+        <!-- PRO CAMERA -->
+        <section id="camera" class="tool-section">
+            <h2><i class="fas fa-camera"></i> Pro Camera</h2>
+            <div class="camera-viewport">
+                <video id="cameraVideo" autoplay playsinline muted></video>
+                <div class="camera-grid" id="cameraGrid"></div>
+            </div>
+            <div class="card">
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="requestCameraBtn"><i class="fas fa-camera"></i> Request Access</button>
+                    <button class="btn" id="switchCameraBtn"><i class="fas fa-sync-alt"></i> Flip</button>
+                    <button class="btn" id="gridBtn"><i class="fas fa-th"></i> Grid</button>
+                    <button class="btn" id="captureBtn"><i class="fas fa-camera"></i> Capture</button>
+                </div>
+                <div class="control-group" style="margin-top:15px">
+                    <label>Zoom: <span id="zoomVal">1.0</span></label>
+                    <input type="range" class="zoom-slider" id="zoomSlider" min="1" max="10" step="0.1" value="1" style="width:100%;accent-color:var(--accent)">
+                </div>
+                <div class="filter-chips" id="filterChips" style="margin-top:15px">
+                    <span class="filter-chip active" data-filter="none">Original</span>
+                    <span class="filter-chip" data-filter="sepia(100%)">Sepia</span>
+                    <span class="filter-chip" data-filter="grayscale(100%)">B&W</span>
+                    <span class="filter-chip" data-filter="invert(90%)">Invert</span>
+                    <span class="filter-chip" data-filter="brightness(1.4)">Bright</span>
+                    <span class="filter-chip" data-filter="contrast(1.6)">Contrast</span>
+                    <span class="filter-chip" data-filter="saturate(2)">Vivid</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIDEO EDITOR -->
+        <section id="video" class="tool-section">
+            <h2><i class="fas fa-video"></i> Pro Video Editor</h2>
+            <div class="video-editor-layout">
+                <div>
+                    <div class="card">
+                        <div class="card-title">Upload Video</div>
+                        <input type="file" id="videoUpload" accept="video/*" style="display:none" />
+                        <button class="btn btn-primary" onclick="document.getElementById('videoUpload').click()"><i class="fas fa-upload"></i> Choose</button>
+                        <div style="margin-top:15px">
+                            <video id="editVideo" controls style="width:100%;border-radius:12px"></video>
+                        </div>
+                        <div class="timeline-track" style="margin-top:10px">
+                            <div class="timeline-clip">Clip 1</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tool-panel">
+                    <h4>Edit Tools</h4>
+                    <div class="tool-row">
+                        <label>Trim Start</label>
+                        <input type="range" id="trimStartSlider" min="0" max="100" value="0">
+                        <span id="trimStartVal" style="font-size:12px">0s</span>
+                    </div>
+                    <div class="tool-row">
+                        <label>Speed</label>
+                        <input type="range" id="speedSlider" min="0.1" max="3" step="0.1" value="1">
+                        <span id="speedVal">1.0x</span>
+                    </div>
+                    <div class="tool-row">
+                        <label>Volume</label>
+                        <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1">
+                    </div>
+                    <div class="tool-row">
+                        <label>Effect</label>
+                        <select id="effectSelect" style="background:#111420;color:#fff;border:1px solid var(--dark-border);padding:6px;border-radius:8px;width:100%">
+                            <option value="none">None</option>
+                            <option value="sepia(70%)">Sepia</option>
+                            <option value="grayscale(100%)">B&W</option>
+                            <option value="brightness(1.3)">Bright</option>
+                        </select>
+                    </div>
+                    <div class="tool-row">
+                        <label>Text Overlay</label>
+                        <input type="text" id="textOverlay" placeholder="Enter text...">
+                        <button class="btn btn-outline" id="addTextOverlayBtn" style="margin-top:6px"><i class="fas fa-font"></i> Add</button>
+                    </div>
+                    <button class="btn btn-primary" id="exportVideoBtn" style="width:100%;margin-top:15px"><i class="fas fa-download"></i> Export</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUDIO LAB -->
+        <section id="audio" class="tool-section">
+            <h2><i class="fas fa-wave-square"></i> Audio & BRG Graphs</h2>
+            <div class="audio-grid">
+                <div class="graph-box">
+                    <h4>Waveform</h4>
+                    <canvas id="waveCanvas" width="400" height="160"></canvas>
+                </div>
+                <div class="graph-box">
+                    <h4>BRG Frequency</h4>
+                    <canvas id="freqCanvas" width="400" height="160"></canvas>
+                </div>
+            </div>
+            <div style="text-align:center;margin-top:20px">
+                <button class="btn btn-primary" id="startAudioBtn"><i class="fas fa-microphone"></i> Start Mic</button>
+                <button class="btn" id="stopAudioBtn"><i class="fas fa-stop"></i> Stop</button>
+            </div>
+        </section>
+
+        <!-- QR SCANNER -->
+        <section id="qr" class="tool-section">
+            <h2><i class="fas fa-qrcode"></i> QR Scanner</h2>
+            <div class="card" style="max-width:500px;margin:auto">
+                <video id="qrVideo" autoplay playsinline style="width:100%;border-radius:14px"></video>
+                <div class="qr-result-box" id="qrResult" style="margin-top:15px;background:#1a1d29;padding:12px;border-radius:10px;text-align:center">Waiting for QR...</div>
+                <div style="text-align:center;margin-top:15px">
+                    <button class="btn btn-primary" id="startQrBtn"><i class="fas fa-play"></i> Start Scan</button>
+                    <button class="btn" id="stopQrBtn"><i class="fas fa-stop"></i> Stop</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- FIND IT -->
+        <section id="findit" class="tool-section">
+            <h2><i class="fas fa-search"></i> Find It</h2>
+            <div class="card" style="text-align:center">
+                <button class="btn btn-primary" id="findItBtn"><i class="fas fa-camera"></i> Capture & Search</button>
+                <img id="findItPreview" style="max-width:300px;border-radius:10px;display:none;margin:20px auto" />
+                <div id="findItLink"></div>
+            </div>
+        </section>
+
+        <!-- SHARE FILES -->
+        <section id="files" class="tool-section">
+            <h2><i class="fas fa-paper-plane"></i> Share Files (P2P)</h2>
+            <div class="card" style="text-align:center">
+                <div id="fileDrop" style="border:2px dashed var(--accent);border-radius:14px;padding:40px;cursor:pointer;background:var(--dark-card);margin-bottom:20px">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:40px;color:var(--accent)"></i>
+                    <p>Drag files here or click to browse</p>
+                    <input type="file" id="fileInput" multiple style="display:none" />
+                </div>
+                <div id="fileList" style="text-align:left;margin-bottom:20px"></div>
+                <button class="btn btn-primary" id="shareFilesBtn"><i class="fas fa-share"></i> Share (Web Share)</button>
+            </div>
+        </section>
+
+        <!-- SOCIAL -->
+        <section id="social" class="tool-section">
+            <h2><i class="fas fa-globe"></i> Social Directives</h2>
+            <div class="mini-cards">
+                <div class="mini-card"><i class="fab fa-youtube" style="color:#ff0000;font-size:30px"></i><h4>YouTube</h4><a href="https://youtube.com" target="_blank" class="btn btn-primary">Open</a></div>
+                <div class="mini-card"><i class="fab fa-instagram" style="color:#e4405f;font-size:30px"></i><h4>Instagram</h4><a href="https://instagram.com" target="_blank" class="btn btn-primary">Open</a></div>
+                <div class="mini-card"><i class="fab fa-facebook" style="color:#1877f2;font-size:30px"></i><h4>Facebook</h4><a href="https://facebook.com" target="_blank" class="btn btn-primary">Open</a></div>
+                <div class="mini-card"><i class="fab fa-reddit" style="color:#ff4500;font-size:30px"></i><h4>Reddit</h4><a href="https://reddit.com" target="_blank" class="btn btn-primary">Open</a></div>
+            </div>
+        </section>
+
+        <!-- COMMUNITY CHAT -->
+        <section id="community" class="tool-section">
+            <h2><i class="fas fa-users"></i> Community Chat</h2>
+            <div class="card" style="max-width:700px;margin:auto">
+                <div class="chat-box" id="chatBox"></div>
+                <div style="display:flex;gap:10px">
+                    <input type="text" id="chatInput" placeholder="Write to everyone..." style="flex:1;padding:12px;border-radius:10px;background:#111420;border:1px solid var(--dark-border);color:#fff" />
+                    <button class="btn btn-primary" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- EVENTS -->
+        <section id="events" class="tool-section">
+            <h2><i class="fas fa-calendar"></i> Events</h2>
+            <div class="mini-cards" id="eventsList"></div>
+        </section>
+
+        <!-- TO-DO -->
+        <section id="todo" class="tool-section">
+            <h2><i class="fas fa-list-check"></i> To-Do</h2>
+            <div class="card" style="max-width:500px">
+                <div class="todo-add" style="display:flex;gap:10px;margin-bottom:15px">
+                    <input type="text" id="todoInput" placeholder="Add task..." style="flex:1;padding:12px;border-radius:10px;background:#111420;border:1px solid var(--dark-border);color:#fff" />
+                    <button class="btn btn-primary" id="addTodoBtn"><i class="fas fa-plus"></i></button>
+                </div>
+                <ul id="todoItems" style="list-style:none"></ul>
+            </div>
+        </section>
+
+        <!-- BIBLE -->
+        <section id="bible" class="tool-section">
+            <h2><i class="fas fa-book-open"></i> Bible App</h2>
+            <div class="card" style="max-width:600px;margin:auto;text-align:center">
+                <div id="bibleVerse" style="font-size:18px;line-height:1.7;padding:25px;background:#141722;border-radius:12px;border-left:4px solid var(--accent)"></div>
+                <div style="margin-top:20px;display:flex;gap:10px;justify-content:center">
+                    <button class="btn" onclick="biblePrev()"><i class="fas fa-arrow-left"></i> Previous</button>
+                    <button class="btn" onclick="bibleNext()"><i class="fas fa-arrow-right"></i> Next</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTS -->
+        <section id="products" class="tool-section">
+            <h2><i class="fas fa-store"></i> Products</h2>
+            <div class="mini-cards" id="productsList"></div>
+        </section>
+
+        <!-- CHANNELS -->
+        <section id="channels" class="tool-section">
+            <h2><i class="fas fa-tv"></i> Channels</h2>
+            <div class="mini-cards" id="channelsList"></div>
+        </section>
+
+        <!-- CONTENT -->
+        <section id="content" class="tool-section">
+            <h2><i class="fas fa-newspaper"></i> Content Feed</h2>
+            <div class="card" id="contentFeed"></div>
+        </section>
+
+        <!-- BRIEFING -->
+        <section id="briefing" class="tool-section">
+            <h2><i class="fas fa-briefcase"></i> Daily Briefing</h2>
+            <div class="card" id="briefingBox"></div>
+        </section>
+
+        <!-- SHORTS -->
+        <section id="shorts" class="tool-section">
+            <h2><i class="fas fa-film"></i> Shorts</h2>
+            <div class="mini-cards" id="shortsList"></div>
+        </section>
+
+        <!-- POST WALL (Decentralized Posts) -->
+        <section id="postwall" class="tool-section">
+            <h2><i class="fas fa-comment-dots"></i> Community Post Wall (Local)</h2>
+            <div class="card">
+                <div style="display:flex;gap:10px;margin-bottom:20px">
+                    <input type="text" id="postAuthor" placeholder="Your name" style="flex:1;padding:12px;border-radius:10px;background:#111420;border:1px solid var(--dark-border);color:#fff" />
+                    <input type="text" id="postText" placeholder="What's happening?" style="flex:2;padding:12px;border-radius:10px;background:#111420;border:1px solid var(--dark-border);color:#fff" />
+                    <button class="btn btn-primary" id="postBtn"><i class="fas fa-paper-plane"></i> Post</button>
+                </div>
+                <div id="postWall" class="post-wall"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Floating Notepad -->
+    <div class="notepad-widget" id="floatNotepad">
+        <div class="notepad-header">
+            <strong><i class="fas fa-note-sticky" style="color:var(--accent)"></i> Quick Note</strong>
+            <div>
+                <i class="fas fa-minus" id="minimizeNotepad"></i>
+                <i class="fas fa-times" id="closeNotepad"></i>
+            </div>
+        </div>
+        <div class="notepad-body">
+            <textarea id="notepadText" placeholder="Type your note..."></textarea>
+        </div>
+    </div>
+
+    <script>
+        // ── Nav active state & smooth scroll ──
+        const navBtns = document.querySelectorAll('.nav-btn');
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.preventDefault();
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const target = document.querySelector(btn.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // ── Camera ──
+        let cameraStream = null;
+        let usingFront = true;
+        const cameraVideo = document.getElementById('cameraVideo');
+        const requestBtn = document.getElementById('requestCameraBtn');
+        async function requestCamera() {
+            try {
+                if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: usingFront ? 'user' : 'environment' },
+                    audio: false
+                });
+                cameraVideo.srcObject = cameraStream;
+            } catch (e) { alert('Camera error: ' + e.message); }
+        }
+        requestBtn.addEventListener('click', requestCamera);
+        document.getElementById('switchCameraBtn').addEventListener('click', () => { usingFront = !usingFront; requestCamera(); });
+        document.getElementById('gridBtn').addEventListener('click', () => document.getElementById('cameraGrid').classList.toggle('show'));
+        document.getElementById('captureBtn').addEventListener('click', () => {
+            if (!cameraStream) { alert('Camera not active!'); return; }
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraVideo.videoWidth;
+            canvas.height = cameraVideo.videoHeight;
+            canvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+            const a = document.createElement('a');
+            a.download = 'photo.png'; a.href = canvas.toDataURL(); a.click();
+        });
+        document.getElementById('zoomSlider').addEventListener('input', function() {
+            document.getElementById('zoomVal').textContent = this.value;
+            if (cameraStream) cameraStream.getVideoTracks()[0].applyConstraints({ advanced: [{ zoom: parseFloat(this.value) }] }).catch(() => {});
+        });
+        // Filters
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                cameraVideo.style.filter = this.dataset.filter;
+            });
+        });
+
+        // ── Video Editor ──
+        const videoUpload = document.getElementById('videoUpload');
+        const editVideo = document.getElementById('editVideo');
+        videoUpload.addEventListener('change', function() {
+            if (this.files[0]) {
+                editVideo.src = URL.createObjectURL(this.files[0]);
+                editVideo.play();
+            }
+        });
+        document.getElementById('speedSlider').addEventListener('input', function() {
+            editVideo.playbackRate = parseFloat(this.value);
+            document.getElementById('speedVal').textContent = parseFloat(this.value).toFixed(1) + 'x';
+        });
+        document.getElementById('volumeSlider').addEventListener('input', function() { editVideo.volume = parseFloat(this.value); });
+        document.getElementById('effectSelect').addEventListener('change', function() { editVideo.style.filter = this.value; });
+        document.getElementById('addTextOverlayBtn').addEventListener('click', () => alert('Text overlay simulated (local)'));
+        document.getElementById('exportVideoBtn').addEventListener('click', () => {
+            if (!editVideo.src) { alert('Upload video first!'); return; }
+            const a = document.createElement('a');
+            a.download = 'edited.mp4'; a.href = editVideo.src; a.click();
+        });
+
+        // ── Audio ──
+        let audioCtx, analyser, audioStream2, audioData, audioRAF;
+        function startAudio() {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                audioStream2 = stream;
+                const source = audioCtx.createMediaStreamSource(stream);
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 128;
+                source.connect(analyser);
+                audioData = new Uint8Array(analyser.frequencyBinCount);
+                drawAudio();
+            }).catch(e => alert('Mic error: ' + e.message));
+        }
+        function stopAudio() {
+            if (audioStream2) audioStream2.getTracks().forEach(t => t.stop());
+            if (audioCtx) audioCtx.close();
+            if (audioRAF) cancelAnimationFrame(audioRAF);
+        }
+        function drawAudio() {
+            if (!analyser) return;
+            analyser.getByteTimeDomainData(audioData);
+            const wctx = document.getElementById('waveCanvas').getContext('2d');
+            wctx.clearRect(0, 0, 400, 160);
+            wctx.strokeStyle = '#f472b6';
+            wctx.lineWidth = 2;
+            wctx.beginPath();
+            for (let i = 0; i < audioData.length; i++) {
+                const x = (i / audioData.length) * 400;
+                const y = (audioData[i] / 128) * 80;
+                i === 0 ? wctx.moveTo(x, y) : wctx.lineTo(x, y);
+            }
+            wctx.stroke();
+            analyser.getByteFrequencyData(audioData);
+            const fctx = document.getElementById('freqCanvas').getContext('2d');
+            fctx.clearRect(0, 0, 400, 160);
+            const barW = 400 / audioData.length;
+            for (let i = 0; i < audioData.length; i++) {
+                const v = audioData[i] / 255;
+                fctx.fillStyle = `rgb(${Math.round(v*255)},${Math.round(v*100)},${Math.round(v*200)})`;
+                fctx.fillRect(i * barW, 160 - v * 160, barW - 1, v * 160);
+            }
+            audioRAF = requestAnimationFrame(drawAudio);
+        }
+        document.getElementById('startAudioBtn').addEventListener('click', startAudio);
+        document.getElementById('stopAudioBtn').addEventListener('click', stopAudio);
+
+        // ── QR ──
+        let qrStream = null, qrRAF = null;
+        const qrVideo = document.getElementById('qrVideo');
+        async function startQR() {
+            try {
+                qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                qrVideo.srcObject = qrStream;
+                scanQR();
+            } catch (e) { alert('QR camera error: ' + e.message); }
+        }
+        function scanQR() {
+            if (!qrStream) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = qrVideo.videoWidth || 640;
+            canvas.height = qrVideo.videoHeight || 480;
+            canvas.getContext('2d').drawImage(qrVideo, 0, 0);
+            const code = jsQR(canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
+            if (code) {
+                document.getElementById('qrResult').textContent = '✓ ' + code.data;
+                document.getElementById('qrResult').style.background = '#1e3a1e';
+            } else {
+                document.getElementById('qrResult').textContent = 'Scanning...';
+            }
+            qrRAF = requestAnimationFrame(scanQR);
+        }
+        function stopQR() {
+            if (qrStream) qrStream.getTracks().forEach(t => t.stop());
+            if (qrRAF) cancelAnimationFrame(qrRAF);
+        }
+        document.getElementById('startQrBtn').addEventListener('click', startQR);
+        document.getElementById('stopQrBtn').addEventListener('click', stopQR);
+
+        // ── Find It ──
+        document.getElementById('findItBtn').addEventListener('click', () => {
+            if (!cameraStream) { alert('Enable camera in Camera section first.'); return; }
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraVideo.videoWidth;
+            canvas.height = cameraVideo.videoHeight;
+            canvas.getContext('2d').drawImage(cameraVideo, 0, 0);
+            const url = canvas.toDataURL();
+            document.getElementById('findItPreview').src = url;
+            document.getElementById('findItPreview').style.display = 'block';
+            document.getElementById('findItLink').innerHTML = '<a href="https://lens.google.com/uploadbyurl?url=' + encodeURIComponent(url) + '" target="_blank" class="btn btn-primary">Search with Lens</a>';
+        });
+
+        // ── File Share ──
+        const fileDrop = document.getElementById('fileDrop');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        let selectedFiles = [];
+        fileDrop.addEventListener('click', () => fileInput.click());
+        fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.style.borderColor = '#d9534f'; });
+        fileDrop.addEventListener('dragleave', () => fileDrop.style.borderColor = 'var(--accent)');
+        fileDrop.addEventListener('drop', e => {
+            e.preventDefault();
+            fileDrop.style.borderColor = 'var(--accent)';
+            selectedFiles = [...e.dataTransfer.files];
+            renderFileList();
+        });
+        fileInput.addEventListener('change', function() { selectedFiles = [...this.files]; renderFileList(); });
+        function renderFileList() {
+            fileList.innerHTML = '';
+            selectedFiles.forEach((f, i) => {
+                const div = document.createElement('div');
+                div.style.cssText = 'padding:8px;background:#1a1d29;border-radius:8px;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--dark-border)';
+                div.innerHTML = `<span><i class="fas fa-file" style="margin-right:8px"></i>${f.name}</span>
+                <i class="fas fa-times" style="cursor:pointer" onclick="this.parentElement.remove()"></i>`;
+                fileList.appendChild(div);
+            });
+        }
+        document.getElementById('shareFilesBtn').addEventListener('click', () => {
+            if (selectedFiles.length === 0) { alert('No files selected!'); return; }
+            if (navigator.share) navigator.share({ files: selectedFiles, title: 'VillageHub' }).catch(() => {});
+            else selectedFiles.forEach(f => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; a.click(); });
+        });
+
+        // ── Community Chat ──
+        const chatBox = document.getElementById('chatBox');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+        const chatMessages = [
+            { name: 'Mama Jane', msg: 'Any eggs today?' },
+            { name: 'Pastor John', msg: 'Service at 10AM!' }
+        ];
+        function renderChat() {
+            chatBox.innerHTML = '';
+            chatMessages.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'chat-msg';
+                div.style.cssText = 'background:#252a38;border-radius:10px;padding:8px;margin-bottom:8px;max-width:80%';
+                div.innerHTML = `<strong>${m.name}:</strong> ${m.msg}`;
+                chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+        chatSendBtn.addEventListener('click', () => {
+            if (chatInput.value.trim()) {
+                chatMessages.push({ name: 'You', msg: chatInput.value.trim() });
+                chatInput.value = '';
+                renderChat();
+            }
+        });
+        chatInput.addEventListener('keypress', e => { if (e.key === 'Enter') chatSendBtn.click(); });
+        renderChat();
+
+        // ── To-Do ──
+        let todos = JSON.parse(localStorage.getItem('vh_todos') || '[]');
+        function renderTodos() {
+            const ul = document.getElementById('todoItems');
+            ul.innerHTML = '';
+            todos.forEach((t, i) => {
+                const li = document.createElement('li');
+                li.className = 'todo-item' + (t.done ? ' done' : '');
+                li.style.cssText = 'display:flex;align-items:center;gap:10px;background:#1a1d29;padding:12px;border-radius:10px;margin-bottom:8px;border:1px solid var(--dark-border)';
+                li.innerHTML = `<input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${i})" style="accent-color:#f472b6">
+                <span style="text-decoration:${t.done ? 'line-through' : 'none'}">${t.text}</span>
+                <i class="fas fa-trash" style="margin-left:auto;color:#e4574d;cursor:pointer" onclick="deleteTodo(${i})"></i>`;
+                ul.appendChild(li);
+            });
+        }
+        document.getElementById('addTodoBtn').addEventListener('click', () => {
+            const input = document.getElementById('todoInput');
+            if (input.value.trim()) {
+                todos.push({ text: input.value.trim(), done: false });
+                localStorage.setItem('vh_todos', JSON.stringify(todos));
+                input.value = '';
+                renderTodos();
+            }
+        });
+        function toggleTodo(i) { todos[i].done = !todos[i].done; localStorage.setItem('vh_todos', JSON.stringify(todos)); renderTodos(); }
+        function deleteTodo(i) { todos.splice(i, 1); localStorage.setItem('vh_todos', JSON.stringify(todos)); renderTodos(); }
+        renderTodos();
+
+        // ── Notepad ──
+        const notepadText = document.getElementById('notepadText');
+        notepadText.value = localStorage.getItem('vh_notepad') || '';
+        notepadText.addEventListener('input', () => localStorage.setItem('vh_notepad', notepadText.value));
+        const floatNotepad = document.getElementById('floatNotepad');
+        let isDragging = false, offsetX, offsetY;
+        floatNotepad.addEventListener('mousedown', function(e) {
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'I') return;
+            isDragging = true;
+            offsetX = e.clientX - floatNotepad.getBoundingClientRect().left;
+            offsetY = e.clientY - floatNotepad.getBoundingClientRect().top;
+        });
+        document.addEventListener('mousemove', e => {
+            if (isDragging) {
+                floatNotepad.style.left = (e.clientX - offsetX) + 'px';
+                floatNotepad.style.top = (e.clientY - offsetY) + 'px';
+                floatNotepad.style.right = 'auto';
+                floatNotepad.style.bottom = 'auto';
+            }
+        });
+        document.addEventListener('mouseup', () => isDragging = false);
+        document.getElementById('closeNotepad').addEventListener('click', () => floatNotepad.style.display = 'none');
+        document.getElementById('minimizeNotepad').addEventListener('click', () => {
+            const body = floatNotepad.querySelector('.notepad-body');
+            body.style.display = body.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // ── Bible ──
+        const bibleVerses = [
+            { text: '"For God so loved the world..."', ref: 'John 3:16' },
+            { text: '"I can do all things through Christ..."', ref: 'Philippians 4:13' },
+            { text: '"The Lord is my shepherd..."', ref: 'Psalm 23:1' }
+        ];
+        let bIndex = 0;
+        function renderBible() { document.getElementById('bibleVerse').innerHTML = `"${bibleVerses[bIndex].text}" — ${bibleVerses[bIndex].ref}`; }
+        function biblePrev() { bIndex = (bIndex - 1 + bibleVerses.length) % bibleVerses.length; renderBible(); }
+        function bibleNext() { bIndex = (bIndex + 1) % bibleVerses.length; renderBible(); }
+        renderBible();
+
+        // ── Populate Data (local, static) ──
+        const events = [
+            { name: 'Village Meeting', date: 'Sep 15', desc: 'Community talk' },
+            { name: 'Harvest Festival', date: 'Sep 22', desc: 'Celebrate!' }
+        ];
+        document.getElementById('eventsList').innerHTML = events.map(e => `<div class="mini-card"><h4>${e.name}</h4><p>${e.date}</p><p>${e.desc}</p></div>`).join('');
+        const products = [
+            { name: 'Maize', price: '$5' },
+            { name: 'Basket', price: '$12' }
+        ];
+        document.getElementById('productsList').innerHTML = products.map(p => `<div class="mini-card"><h4>${p.name}</h4><p>${p.price}</p></div>`).join('');
+        const channels = [
+            { name: 'News', desc: 'Local updates' },
+            { name: 'Farming', desc: 'Agri tips' }
+        ];
+        document.getElementById('channelsList').innerHTML = channels.map(c => `<div class="mini-card"><h4>${c.name}</h4><p>${c.desc}</p></div>`).join('');
+        document.getElementById('contentFeed').innerHTML = '<h4>Latest</h4><p>🌱 Garden needs volunteers</p><p>📸 New pump installed</p>';
+        document.getElementById('briefingBox').innerHTML = '<h4>Sep 8 Briefing</h4><ul><li>☀️ Sunny 28°C</li><li>🚧 Roadwork</li></ul>';
+        document.getElementById('shortsList').innerHTML = '<div class="mini-card">🎬 Cooking Short</div><div class="mini-card">🎬 Dance</div>';
+
+        // ── Post Wall (local storage) ──
+        let posts = JSON.parse(localStorage.getItem('vh_posts') || '[]');
+        function renderPosts() {
+            const wall = document.getElementById('postWall');
+            wall.innerHTML = '';
+            posts.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'post-item';
+                div.innerHTML = `<div class="post-author"><i class="fas fa-user-circle"></i> ${p.author}</div><div>${p.text}</div>`;
+                wall.appendChild(div);
+            });
+        }
+        document.getElementById('postBtn').addEventListener('click', () => {
+            const author = document.getElementById('postAuthor').value.trim() || 'Anonymous';
+            const text = document.getElementById('postText').value.trim();
+            if (!text) return;
+            posts.push({ author, text });
+            localStorage.setItem('vh_posts', JSON.stringify(posts));
+            document.getElementById('postText').value = '';
+            renderPosts();
+        });
+        renderPosts();
+
+        // Load jsQR library for QR scanning
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+        document.head.appendChild(script);
+
+        console.log('VillageHub decentralized version loaded — all data local, all tools free.');
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+</html>

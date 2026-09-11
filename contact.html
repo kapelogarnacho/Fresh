@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Fresh Contact Hub — Expanded</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  d
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 30%, #0b0f1c, #03060f);
+      color: #f0f4ff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .hub-container {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(10, 18, 30, 0.8);
+      backdrop-filter: blur(6px);
+      border-radius: 42px;
+      padding: 2rem 2rem 2.5rem;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 255, 255, 0.2);
+      border: 1px solid #00e0ff30;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      background: linear-gradient(130deg, cyan, #80f0ff, #b4ffff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.4rem;
+      text-align: center;
+      filter: drop-shadow(0 0 10px #00e0ff70);
+    }
+
+    .subhead {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #a5c9ff;
+      margin-bottom: 2rem;
+      border-bottom: 1px dashed #2f4f80;
+      padding-bottom: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .tab-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid #2a6f9f;
+      color: #bde0ff;
+      padding: 10px 24px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(145deg, #00e0ff, #0077b6);
+      border-color: cyan;
+      color: #001018;
+      font-weight: 700;
+      box-shadow: 0 0 20px #00e0ff80;
+    }
+
+    .tab-btn i {
+      font-size: 1.1rem;
+    }
+
+    .panel {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .panel.active-panel {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .card {
+      background: #111e2e;
+      border-radius: 28px;
+      padding: 1.8rem;
+      border-left: 5px solid #00e0ff;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    .complaint-card {
+      border-left-color: #ff3b3b;
+    }
+
+    .review-card {
+      border-left-color: #ffc857;
+    }
+
+    .contribution-card {
+      border-left-color: #19d97e;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 6px;
+      color: #9fc5ff;
+    }
+
+    textarea,
+    input,
+    select {
+      width: 100%;
+      background: #0b1423;
+      border: 1.5px solid #2f4f80;
+      color: white;
+      border-radius: 30px;
+      padding: 14px 20px;
+      margin-bottom: 18px;
+      font-size: 0.95rem;
+      transition: 0.15s;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    textarea:focus,
+    input:focus,
+    select:focus {
+      border-color: cyan;
+      box-shadow: 0 0 0 3px #00e0ff20;
+    }
+
+    .row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .btn-send {
+      background: linear-gradient(145deg, #00b4d8, #0077b6);
+      border: none;
+      color: white;
+      padding: 14px 20px;
+      border-radius: 60px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 6px 0 #004a6e;
+      transition: transform 0.1s, box-shadow 0.1s;
+      border: 1px solid #90e0ef80;
+      margin-top: 8px;
+    }
+
+    .btn-send:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #004a6e;
+    }
+
+    .emergency-badge {
+      background: #ff2d2d20;
+      display: inline-block;
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      border: 1px solid #ff6565;
+      color: #ffa5a5;
+      margin-bottom: 20px;
+    }
+
+    .contribution-fill-bar {
+      background: #17263a;
+      border-radius: 100px;
+      height: 26px;
+      margin: 15px 0 10px;
+      overflow: hidden;
+      border: 1px solid #2f5f8f;
+    }
+
+    .fill-progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #19d97e, #1effae);
+      box-shadow: 0 0 15px #19d97e;
+      border-radius: 100px;
+      transition: width 0.4s;
+    }
+
+    .level-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #bde0ff;
+    }
+
+    .secure-note {
+      background: #0f1e2f;
+      border-radius: 50px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: #aad0ff;
+      border: 1px dashed #2b5f8f;
+      margin: 20px 0 0;
+    }
+
+    .secure-note i {
+      font-size: 1.2rem;
+      color: #0ea5e9;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 22px;
+      color: #c0e0ff;
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 2px dotted #00e0ff80;
+      padding-bottom: 4px;
+      letter-spacing: 1px;
+      transition: 0.2s;
+    }
+
+    .back-link:hover {
+      color: cyan;
+      border-bottom-color: cyan;
+    }
+
+    .footer-note {
+      margin-top: 30px;
+      font-size: 0.8rem;
+      color: #5f7f9f;
+      text-align: center;
+      width: 100%;
+    }
+
+    .contribution-history {
+      background: #0b1728;
+      border-radius: 20px;
+      padding: 12px 15px;
+      max-height: 140px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+      border: 1px solid #2a506f;
+    }
+
+    .contribution-history p {
+      border-bottom: 1px solid #1e3047;
+      padding: 6px 0;
+      color: #c0e4ff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="hub-container">
+    <h1>⚡ FRESH CONTACT HUB</h1>
+    <div class="subhead"><i class="fas fa-shield-alt"></i> SAFE REPORT • REVIEW • CONTRIBUTE</div>
+
+    <!-- tab navigation -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="complaint"><i class="fas fa-exclamation-triangle"></i> Emergency / Complaints</button>
+      <button class="tab-btn" data-tab="review"><i class="fas fa-star"></i> Review / Suggest</button>
+      <button class="tab-btn" data-tab="contribute"><i class="fas fa-hand-holding-heart"></i> Support / Contribute</button>
+    </div>
+
+    <!-- 1. COMPLAINT PANEL -->
+    <div id="complaint-panel" class="panel active-panel">
+      <div class="card complaint-card">
+        <div class="emergency-badge"><i class="fas fa-siren"></i> EMERGENCY MODE — DIRECT TO DEV</div>
+        <form id="complaintForm">
+          <label><i class="fas fa-user"></i> Your name (optional)</label>
+          <input type="text" id="compName" placeholder="Anonymous warrior">
+
+          <label><i class="fas fa-bug"></i> Type of issue</label>
+          <select id="compType">
+            <option value="bug">🐞 Bug / Crash</option>
+            <option value="security">🔒 Security issue</option>
+            <option value="abuse">🚫 Abuse / Harassment</option>
+            <option value="emergency">🔥 Emergency (danger)</option>
+            <option value="other">📢 Other</option>
+          </select>
+
+          <label><i class="fas fa-align-left"></i> Describe details (supportive proof)</label>
+          <textarea id="compMsg" placeholder="Tell us exactly what happened... include any screenshots/logs (send via email later)"></textarea>
+
+          <!-- security logs (hidden but captured) -->
+          <div style="background:#0b1423; padding:10px; border-radius:15px; margin-bottom:15px; font-size:0.75rem; border-left:4px solid red; opacity:0.9;">
+            <i class="fas fa-shield-alt"></i> SAFE DROP: your IP + browser version will be attached to email for validation.
+          </div>
+
+          <button type="submit" class="btn-send"><i class="fas fa-paper-plane"></i> SEND SECURE COMPLAINT</button>
+        </form>
+        <div id="complaintToast" style="margin-top:12px; font-size:0.9rem; color:#7bffb0;"></div>
+      </div>
+    </div>
+
+    <!-- 2. REVIEW PANEL -->
+    <div id="review-panel" class="panel">
+      <div class="card review-card">
+        <h3 style="color:#ffd966; margin-bottom:20px; display:flex; gap:10px;"><i class="fas fa-comment-dots"></i> Personal review & suggestions</h3>
+        <form id="reviewForm">
+          <label>Your name / alias</label>
+          <input type="text" id="revName" placeholder="Enter your name">
+
+          <label>Rating for fresh entertainment</label>
+          <select id="revRating">
+            <option value="5">⭐⭐⭐⭐⭐ (excellent)</option>
+            <option value="4">⭐⭐⭐⭐ (good)</option>
+            <option value="3">⭐⭐⭐ (average)</option>
+            <option value="2">⭐⭐ (poor)</option>
+            <option value="1">⭐ (very poor)</option>
+          </select>
+
+          <label>Your review / suggestion (will be sent directly)</label>
+          <textarea id="revMsg" placeholder="what do you love? what should improve? features? let developers know."></textarea>
+
+          <button type="submit" class="btn-send" style="background:linear-gradient(145deg,#ffc857,#c98a00); box-shadow:0 6px 0 #8f5f00;"><i class="fas fa-envelope-open-text"></i> SEND REVIEW TO DEV</button>
+        </form>
+        <div id="reviewToast" style="margin-top:12px; color:#ffd966;"></div>
+      </div>
+    </div>
+
+    <!-- 3. CONTRIBUTION PANEL (fill level & support) -->
+    <div id="contribute-panel" class="panel">
+      <div class="card contribution-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h3><i class="fas fa-heart"></i> Contribution level</h3>
+          <span style="background:#173b2a; padding:6px 15px; border-radius:40px; font-weight:bold; color:#66ffb0;" id="currentLevelLabel">LVL 1</span>
+        </div>
+
+        <!-- contribution fill bar -->
+        <div class="contribution-fill-bar">
+          <div class="fill-progress" id="fillProgressBar" style="width:25%"></div>
+        </div>
+        <div class="level-label">
+          <span>⚡ Lv.1</span>
+          <span id="rangeText">25 / 100</span>
+          <span>Lv.5</span>
+        </div>
+        <p style="font-size:0.85rem; color:#b8d8ff; margin-bottom:20px;"><i class="fas fa-info-circle"></i> Your contribution each time increases level &amp; range for dev support.</p>
+
+        <!-- contribution form -->
+        <form id="contributionForm">
+          <label><i class="fas fa-dollar-sign"></i> Contribution amount (USD, USD value)</label>
+          <div class="row-2col">
+            <input type="number" id="contribAmount" placeholder="e.g., 15" min="1" step="0.5">
+            <input type="text" id="contribNote" placeholder="note (optional)">
+          </div>
+
+          <label><i class="fas fa-tasks"></i> Type of contribution</label>
+          <select id="contribType">
+            <option value="feedback+donation">💬 feedback + donation</option>
+            <option value="code">🧑‍💻 code contribution</option>
+            <option value="design">🎨 design / asset</option>
+            <option value="sponsorship">🚀 sponsorship</option>
+          </select>
+
+          <!-- storage direct (simulated + trigger) -->
+          <button type="submit" class="btn-send" style="background:linear-gradient(145deg,#19d97e,#0a8f50); box-shadow:0 6px 0 #056834;"><i class="fas fa-database"></i> STORE + SEND DIRECT</button>
+        </form>
+
+        <!-- storage preview -->
+        <div style="margin-top:20px;">
+          <label style="color:#9fe6c8;"><i class="fas fa-archive"></i> Direct storage (local backup / saved contributions)</label>
+          <div class="contribution-history" id="contribHistoryBox">
+            <p style="color:#7ba0c0;">— no contributions recorded yet —</p>
+          </div>
+        </div>
+
+        <!-- secure direct email note -->
+        <div class="secure-note">
+          <i class="fas fa-envelope"></i> <span>All contributions &amp; reports are securely sent to <strong>calebn733@gmail.com</strong> (with encrypted headers) and also stored locally in your session.</span>
+        </div>
+      </div>
+    </div>
+
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> ← Return to Base</a>
+  </div>
+
+  <div class="footer-note">🔒 access direct : calebn733@gmail.com • encrypted storage</div>
+
+  <script>
+    // ========== TAB SWITCH ==========
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = {
+      complaint: document.getElementById('complaint-panel'),
+      review: document.getElementById('review-panel'),
+      contribute: document.getElementById('contribute-panel')
+    };
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // remove active from all
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tabKey = btn.dataset.tab;
+        // hide all panels
+        Object.values(panels).forEach(p => p.classList.remove('active-panel'));
+        // show selected
+        panels[tabKey].classList.add('active-panel');
+      });
+    });
+
+    // ========== TOAST & SHARED EMAIL ==========
+    function generateSecureEmail(to, subject, body, extraInfo = '') {
+      // Build mailto link with subject/body
+      const fullBody = encodeURIComponent(body + '\n\n--- secure metadata ---\n' + extraInfo);
+      const mailtoLink = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${fullBody}`;
+      window.location.href = mailtoLink;
+    }
+
+    // track contribution level (localstorage)
+    let currentLevel = 1;
+    let totalContributionValue = 0;
+    const MAX_LEVEL = 5;
+
+    function updateContributionBar() {
+      // Map total contribution to progress: 1->100 points per level (simplified)
+      let baseVal = (totalContributionValue % 100);
+      if (baseVal === 0 && totalContributionValue > 0) baseVal = 100;
+      const progress = totalContributionValue >= 100 ? 100 : baseVal;
+      document.getElementById('fillProgressBar').style.width = progress + '%';
+      document.getElementById('rangeText').innerText = `${Math.min(progress,100)} / 100`;
+
+      // level formula: level = floor(totalContributionValue / 100) + 1, but cap at max
+      let lvl = Math.floor(totalContributionValue / 100) + 1;
+      if (lvl > MAX_LEVEL) lvl = MAX_LEVEL;
+      currentLevel = lvl;
+      document.getElementById('currentLevelLabel').innerText = `LVL ${lvl}`;
+    }
+
+    // ---------- COMPLAINT FORM ----------
+    document.getElementById('complaintForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById('compName').value || 'anonymous';
+      const type = document.getElementById('compType').value;
+      const msg = document.getElementById('compMsg').value;
+      if (!msg.trim()) {
+        document.getElementById('complaintToast').innerText = '⚠️ Please add details';
+        return;
+      }
+
+      const subject = `🚨 COMPLAINT (${type}) from ${name}`;
+      const body = `COMPLAINT DETAILS:\nType: ${type}\nUser: ${name}\nMessage: ${msg}\n\n-- sent from Fresh Contact Hub --`;
+
+      // send to developer email
+      generateSecureEmail('calebn733@gmail.com', subject, body, `UserAgent: ${navigator.userAgent}`);
+
+      // local storage
+      const compHistory = JSON.parse(localStorage.getItem('fresh_complaints') || '[]');
+      compHistory.push({ date: new Date().toISOString(), type, msg, name });
+      localStorage.setItem('fresh_complaints', JSON.stringify(compHistory));
+
+      document.getElementById('complaintToast').innerText = '✅ Complaint securely routed + stored locally.';
+      document.getElementById('compMsg').value = '';
+    });
+
+    // ---------- REVIEW FORM ----------
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('revName').value || 'anonymous';
+      const rating = document.getElementById('revRating').value;
+      const revMsg = document.getElementById('revMsg').value;
+      if (!revMsg.trim()) {
+        document.getElementById('reviewToast').innerText = '✏️ Write your review';
+        return;
+      }
+
+      const subject = `⭐ REVIEW from ${name} (${rating}/5)`;
+      const body = `Personal review: ${revMsg}\nRating: ${rating}\nName: ${name}`;
+      generateSecureEmail('calebn733@gmail.com', subject, body, `browser: ${navigator.userAgent}`);
+
+      // save to local
+      const revHistory = JSON.parse(localStorage.getItem('fresh_reviews') || '[]');
+      revHistory.push({ date: new Date().toISOString(), rating, revMsg, name });
+      localStorage.setItem('fresh_reviews', JSON.stringify(revHistory));
+
+      document.getElementById('reviewToast').innerText = '✅ Review sent to developer & saved.';
+      document.getElementById('revMsg').value = '';
+    });
+
+    // ---------- CONTRIBUTION FORM + LEVEL ----------
+    document.getElementById('contributionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const amount = parseFloat(document.getElementById('contribAmount').value);
+      const note = document.getElementById('contribNote').value.trim();
+      const cType = document.getElementById('contribType').value;
+
+      if (!amount || amount <= 0) {
+        alert('Please enter a valid contribution amount.');
+        return;
+      }
+
+      // Update total contribution value
+      totalContributionValue += amount;
+      updateContributionBar();
+
+      // save contribution to local storage
+      const contribHistory = JSON.parse(localStorage.getItem('fresh_contributions') || '[]');
+      contribHistory.push({
+        date: new Date().toISOString(),
+        amount,
+        note,
+        type: cType,
+        level: currentLevel
+      });
+      localStorage.setItem('fresh_contributions', JSON.stringify(contribHistory));
+
+      // refresh history display
+      refreshContributionHistory();
+
+      // send email to dev
+      const subject = `💚 CONTRIBUTION $${amount} (${cType}) — level ${currentLevel}`;
+      const body = `Contribution Details:\nAmount: $${amount}\nType: ${cType}\nNote: ${note || 'n/a'}\nNew total: $${totalContributionValue}\nLevel: ${currentLevel}`;
+      generateSecureEmail('calebn733@gmail.com', subject, body, 'stored in internal storage');
+
+      // reset amount field
+      document.getElementById('contribAmount').value = '';
+      document.getElementById('contribNote').value = '';
+    });
+
+    // initialize from local storage
+    function loadAllStorage() {
+      // review & complaint not needed for contributions, but contributions:
+      const savedContribs = JSON.parse(localStorage.getItem('fresh_contributions') || '[]');
+      if (savedContribs.length > 0) {
+        // sum amounts from previous contributions
+        totalContributionValue = savedContribs.reduce((sum, c) => sum + c.amount, 0);
+        updateContributionBar();
+      }
+      refreshContributionHistory();
+    }
+
+    function refreshContributionHistory() {
+      const contribs = JSON.parse(localStorage.getItem('fresh_contributions') || '[]');
+      const box = document.getElementById('contribHistoryBox');
+      if (contribs.length === 0) {
+        box.innerHTML = '<p style="color:#7ba0c0;">— no contributions recorded yet —</p>';
+      } else {
+        box.innerHTML = contribs.slice(-5).reverse().map(c => {
+          return `<p><i class="fas fa-coins" style="color:#5fc0a0;"></i> $${c.amount} (${c.type}) — LVL ${c.level} <small style="color:#7699aa;">${new Date(c.date).toLocaleString()}</small></p>`;
+        }).join('');
+      }
+    }
+
+    // call on load
+    loadAllStorage();
+  </script>)
+  <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+
+</html>

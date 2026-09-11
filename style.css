@@ -1,0 +1,1297 @@
+/* ===================================================
+   FRESH ENTERTAINMENT – STYLE.CSS (YOUR LAYOUT + PARTY MODE)
+   =================================================== */
+
+/* ---------- 1. GENERAL & BODY ---------- */
+body {
+  margin: 0;
+  font-family: 'Times New Roman', Times, serif;
+  color: white;
+  height: 100%;
+  width: 700px;
+  background-color: #000;
+  animation: bg-pulse 10s infinite alternate;
+  padding: 0;
+}
+
+@keyframes bg-pulse {
+  0%   { background-color: #000000; }
+  35%  { background-color: #1a1a00; }
+  65%  { background-color: #0e0b00; }
+  100% { background-color: #001f29; }
+}
+
+/* ---------- 2. SCANLINE OVERLAY (Party Mode) ---------- */
+.scanline-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.2),
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  background-size: 100% 3px;
+  z-index: 50;
+  pointer-events: none;
+  display: none;
+}
+
+/* ---------- 3. HEADER ---------- */
+header {
+  position: relative;
+  padding: 10px;
+  background: #111;
+  text-align: center;
+  box-shadow: 4px 6px rgba(0, 0, 0, 0.3);
+  font-size: 57px;
+  line-height: 1;
+}
+
+.logo-container {
+  padding: 1px;
+  line-height: 0.8;
+}
+
+.fresh {
+  color: #00FFFF;
+  text-shadow: 0 0 10px #00FFFF;
+}
+
+.ent {
+  color: #FFFF00;
+  text-shadow: 0 0 10px #FFFF00;
+}
+
+.slogan-wrapper {
+  display: inline-block;
+  margin-top: 15px;
+}
+
+.slogan {
+  font-size: 1.2rem;
+  color: white;
+  overflow: hidden;
+  border-right: .15em solid orange;
+  white-space: nowrap;
+  margin-top: -10px;
+  letter-spacing: .10em;
+  animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+  max-width: 100%;
+  text-decoration: underline #ff8c00;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50%      { border-color: orange; }
+}
+
+/* ---------- 4. PROFILE MODAL ---------- */
+.profile-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 100;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(8px);
+}
+
+.profile-card {
+  background: #0a0a0a;
+  border: 2px solid #00f3ff;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 0 50px rgba(0, 243, 255, 0.2);
+  text-align: center;
+  color: white;
+}
+
+.profile-header img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 3px solid #ffff00;
+  margin-bottom: 10px;
+}
+
+.rank-badge {
+  background: linear-gradient(45deg, #ff0055, #ffaa00);
+  padding: 5px 15px;
+  border-radius: 20px;
+  display: inline-block;
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+}
+
+.profile-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  padding: 15px 0;
+}
+
+.profile-stats strong {
+  font-size: 1.5rem;
+  color: #00f3ff;
+  display: block;
+}
+
+.profile-stats span {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.profile-actions button {
+  background: red;
+  border: 1px solid #555;
+  color: white;
+  padding: 8px 15px;
+  margin: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+.profile-actions button:hover {
+  background: #00f3ff;
+  color: black;
+  border-color: #00f3ff;
+}
+
+.close-profile {
+  position: relative;
+  top: 15px;
+  right: 20px;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #ff0055;
+}
+
+/* ---------- 5. PARTY MODE SWITCH (Floating on Side) ---------- */
+.party-switch-container {
+  position: fixed;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  z-index: 10000;
+  animation: floatParty 3s ease-in-out infinite;
+}
+
+@keyframes floatParty {
+  0%   { transform: translateY(-50%); }
+  50%  { transform: translateY(-60%); }
+  100% { transform: translateY(-50%); }
+}
+
+.cyber-switch {
+  background: linear-gradient(90deg, #111, #222);
+  color: #00FFFF;
+  border: 2px solid #00FFFF;
+  padding: 10px 20px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px #00FFFF;
+  transition: 0.3s;
+  letter-spacing: 1px;
+}
+
+.cyber-switch:hover {
+  background: #00FFFF;
+  color: #000;
+  box-shadow: 0 0 30px #00FFFF, 0 0 60px #00FFFF;
+}
+
+/* ---------- 6. PARTY MODE ACTIVE STATE ---------- */
+body.party-mode {
+  animation: party-vibes 0.2s infinite alternate !important;
+  cursor: crosshair;
+}
+
+body.party-mode .scanline-overlay {
+  display: block;
+}
+
+body.party-mode .fresh,
+body.party-mode .ent {
+  animation: neon-cycle 0.5s infinite;
+}
+
+@keyframes party-vibes {
+  0%   { filter: contrast(1.1) brightness(1.1); transform: translateX(1px); }
+  100% { filter: contrast(1.3) brightness(1.3) hue-rotate(20deg); transform: translateX(-1px); }
+}
+
+@keyframes neon-cycle {
+  0%   { color: #ff0000; text-shadow: 0 0 20px red; }
+  20%  { color: #ffff00; text-shadow: 0 0 20px yellow; }
+  40%  { color: #00ff00; text-shadow: 0 0 20px lime; }
+  60%  { color: #00ffff; text-shadow: 0 0 20px cyan; }
+  80%  { color: #0000ff; text-shadow: 0 0 20px blue; }
+  100% { color: #ff00ff; text-shadow: 0 0 20px magenta; }
+}
+
+/* Mouse Trail Dot */
+.trail-dot {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  background: cyan;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: fadeOut 1s forwards;
+  box-shadow: 0 0 10px cyan;
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; transform: scale(0); }
+}
+
+/* Floating Emojis */
+.float-emoji {
+  position: absolute;
+  bottom: -50px;
+  font-size: 2rem;
+  animation: floatUp 4s linear infinite;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+@keyframes floatUp {
+  0%   { transform: translateY(0); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translateY(-300px); opacity: 0; }
+}
+
+/* ---------- 7. NAVIGATION & NEWS ---------- */
+nav {
+  background: #222;
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+nav a {
+  color: #0074aa;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.4s;
+}
+
+nav a:hover {
+  background: linear-gradient(90deg, #ff0404, #ffff00);
+  transform: scale(1.2);
+  text-shadow: 0 0 10px #00FFFF;
+}
+
+.news-banner {
+  background: linear-gradient(90deg, #000f13, #006875);
+  color: white;
+  padding: 10px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.news-content {
+  display: inline-block;
+  padding-left: 100%;
+  animation: scroll-text 25s linear infinite;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.news-banner:hover .news-content {
+  animation-play-state: paused;
+}
+
+@keyframes scroll-text {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ---------- 8. MAIN LAYOUT ---------- */
+.container {
+  max-width: 1400px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.main-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: 20px;
+  width: 100%;
+}
+
+.form-container,
+.image-section,
+.system-links {
+  flex: 1;
+  margin: 0;
+}
+
+/* ---------- 9. IMAGE SECTION ---------- */
+.image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: linear-gradient(9deg, #000f13, #006875, #000f13);
+  border: 1px solid #00FFFF;
+}
+
+.image-section img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+}
+
+.globe-text {
+  text-align: center;
+  margin-top: 15px;
+  color: #016c86;
+  font-size: 1.1rem;
+}
+
+.highlight-text {
+  background: linear-gradient(to right, red, yellow);
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 1.2rem;
+}
+
+/* ---------- 10. SYSTEM LINKS ---------- */
+.system-links {
+  display: flex;
+  flex-direction: column;
+  flex: 1.2;
+  gap: 20px;
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.system-card {
+  background: #2a2a2a;
+  padding: 15px 30px;
+  border-radius: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  animation: glow-loop 3s infinite alternate;
+  box-sizing: border-box;
+}
+
+.system-card:hover {
+  transform: scale(1.1);
+  background: linear-gradient(65deg, #fc0000, #b3b620);
+  z-index: 10;
+}
+
+@keyframes glow-loop {
+  0%   { box-shadow: 0 0 5px #ff0000; border: 1px solid #818181; }
+  100% { box-shadow: 0 0 5px #00ff00; border: 1px solid #ffbb00; }
+}
+
+.icon-glow-cyan   { font-size: 3rem; margin-bottom: 10px; color: #00FFFF; }
+.icon-glow-yellow { font-size: 3rem; margin-bottom: 10px; color: #FFFF00; }
+.icon-glow-pink   { font-size: 3rem; margin-bottom: 10px; color: #ff00ff; }
+
+/* ---------- 11. FORMS ---------- */
+.form-container {
+  background: #222;
+  padding: 40px;
+  border-radius: 15px;
+  flex: 1;
+  margin: 0 0 20px 10;
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.form-container h2 {
+  color: #00FFFF;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+input,
+textarea {
+  width: 100%;
+  padding: 12px;
+  background: #333;
+  border: 1px solid #444;
+  color: #fff;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #FFFF00;
+  outline: none;
+}
+
+.submit-btn {
+  background: linear-gradient(45deg, #00FFFF, #008f8f);
+  color: #000;
+  font-weight: bold;
+  border: none;
+  padding: 15px;
+  width: 100%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: transform 0.2s;
+}
+
+.submit-btn:hover {
+  transform: scale(1.02);
+  background: linear-gradient(45deg, #FFFF00, #ff0404);
+}
+
+/* ---------- 12. GAMES & ARCADE ---------- */
+.game-area-container {
+  background: #050505;
+  padding: 40px 20px;
+  border-top: 2px solid #00FFFF;
+  border-bottom: 2px solid #FFFF00;
+  margin: 20px 0;
+}
+
+.game-area {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  overflow-x: auto;
+  padding-bottom: 20px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #00FFFF #111;
+}
+
+.game-area::-webkit-scrollbar { height: 12px; }
+
+.game-area::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+.game-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #00FFFF, #ff00ff);
+  border-radius: 10px;
+  cursor: pointer;
+  border: 2px solid #111;
+}
+
+.game-card {
+  flex: 0 0 250px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  scroll-snap-align: start;
+  border: 1px solid #00FFFF;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+  padding: 20px;
+  box-sizing: border-box;
+  background: #111;
+}
+
+.game-card:hover {
+  box-shadow: 0 0 25px #00FFFF;
+  transform: translateY(-5px);
+}
+
+.mini-board {
+  width: 150px;
+  height: 150px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+.mini-board div {
+  background: #111;
+  border: 1px solid #00FFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #00FFFF;
+  cursor: pointer;
+}
+
+.mini-canvas {
+  width: 100%;
+  height: 140px;
+  background: #000;
+  position: relative;
+  border: 1px solid #00FFFF;
+  overflow: hidden;
+}
+
+#player {
+  width: 30px;
+  height: 30px;
+  background: #00FFFF;
+  position: absolute;
+  bottom: 0;
+  left: 50px;
+  box-shadow: 0 0 10px #00FFFF;
+}
+
+#obstacle {
+  width: 20px;
+  height: 40px;
+  background: #00FFFF;
+  position: absolute;
+  bottom: 0;
+  right: -50px;
+  box-shadow: 0 0 10px #00FFFF;
+}
+
+@keyframes moveObstacle {
+  0%   { left: 100%; }
+  100% { left: -20px; }
+}
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  margin-top: 10px;
+}
+.memory-card {
+  width: 60px;
+  height: 60px;
+  background: #222;
+  border: 1px solid cyan;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+}
+.memory-card.flipped {
+  background: #fff;
+  color: #000;
+}
+.memory-card.matched {
+  background: #0f0;
+  color: #000;
+}
+/* ---------- 13. VAULT ---------- */
+.vault-wrapper {
+  margin: 0;
+  min-width: 400px;
+  flex: 1.5;
+  background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+  background-size: 400%;
+  padding: 5px;
+  border-radius: 15px;
+  animation: cyber-glow 3s linear infinite;
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+}
+
+@keyframes cyber-glow {
+  0%   { background-position: 0%; }
+  100% { background-position: 400%; }
+}
+
+.vault-interface {
+  background: #000;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #333;
+}
+
+.scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #00ff00;
+  box-shadow: 0 0 15px #00ff00;
+  opacity: 0.6;
+  animation: scan-vertical 2s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan-vertical {
+  0%   { top: 0%; opacity: 0; }
+  50%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.vault-title {
+  font-family: 'Courier New', monospace;
+  color: #ff0055;
+  font-size: 2rem;
+  text-shadow: 2px 2px 0px #00ffff;
+}
+
+.vault-input {
+  background: #111;
+  border: 2px solid #00ffff;
+  color: #00ffff;
+  font-family: 'Courier New', monospace;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.vault-btn {
+  background: #ff0055;
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  padding: 15px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  font-weight: 900;
+  transition: 0.3s;
+}
+
+.vault-btn:hover {
+  background: #ffff00;
+  color: black;
+}
+
+/* ---------- 14. HIDDEN APPS ---------- */
+.app-section {
+  background: #222;
+  border: 5px solid #444;
+  padding: 20px;
+  margin-bottom: 40px;
+  border-radius: 10px;
+  display: none;
+  box-shadow: 10px 10px 0px #00ffff;
+}
+
+.app-section.active {
+  display: block;
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.chat-box {
+  height: 400px;
+  background: #111;
+  overflow-y: scroll;
+  padding: 10px;
+  border: 1px solid #333;
+  margin-bottom: 10px;
+}
+
+.chat-msg {
+  padding: 5px;
+  border-bottom: 1px solid #222;
+}
+
+/* ---------- 15. VIDEO & MEDIA ---------- */
+.video-section-wrapper {
+  width: 100%;
+  margin: 40px 0;
+  background: #000;
+}
+
+.video-welcome-header {
+  text-align: center;
+  padding: 20px;
+  background: black;
+}
+
+.glitch-text {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #fff;
+  text-transform: uppercase;
+  position: relative;
+  text-shadow: 2px 2px 0px #ff00ff, -2px -2px 0px #00ffff;
+  animation: glitch-anim 2s infinite;
+  font-family: 'Impact', sans-serif;
+}
+
+@keyframes glitch-anim {
+  0%   { transform: skew(0deg); }
+  20%  { transform: skew(-10deg); }
+  21%  { transform: skew(10deg); }
+  23%  { transform: skew(0deg); }
+  100% { transform: skew(0deg); }
+}
+
+.video-container {
+  width: 100%;
+  padding: 0;
+  border-top: 2px solid #00FFFF;
+  border-bottom: 2px solid #FFFF00;
+}
+
+video {
+  display: block;
+  width: 100%;
+}
+
+/* ---------- 16. CONTENT BREACH ---------- */
+.content-breach-section {
+  display: flex;
+  gap: 20px;
+  padding: 50px 20px;
+  background: #000;
+  align-items: stretch;
+  min-height: 600px;
+}
+
+.about-left {
+  flex: 1;
+  max-width: 550px;
+  padding-right: 30px;
+  border-right: 2px solid #333;
+}
+
+.about-left h3 {
+  font-size: 2rem;
+  color: #00FFFF;
+  text-shadow: 0 0 10px #00FFFF;
+}
+
+.tiktok-vault {
+  flex: 0 0 350px;
+  height: 600px;
+  background: #000;
+  border: 4px solid #333;
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-feed {
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+}
+
+.feed-item {
+  width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.feed-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vid-caption {
+  position: absolute;
+  bottom: 50px;
+  left: 20px;
+  font-size: 0.8rem;
+  text-shadow: 2px 2px #000;
+}
+
+.upload-overlay {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+.upload-circle {
+  width: 50px;
+  height: 50px;
+  background: #00e1ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 15px #ffee00;
+}
+
+/* ---------- 17. MOVIE & MUSIC SCROLLERS ---------- */
+.movie-scroller-area {
+  flex: 2;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.scroll-row {
+  display: flex;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.scroll-track {
+  display: flex;
+  gap: 15px;
+  animation: scroll-horizontal 30s linear infinite;
+}
+
+.reverse-track {
+  animation-direction: reverse;
+}
+
+@keyframes scroll-horizontal {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.yt-card {
+  flex: 0 0 300px;
+  height: 170px;
+  background: #111;
+  border: 1px solid #00FFFF;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.yt-card:hover {
+  transform: scale(1.05);
+  border-color: #FFFF00;
+  z-index: 10;
+}
+
+.yt-card iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ---------- 18. REVIEWS & EVENTS ---------- */
+.modern-split-section {
+  display: flex;
+  gap: 20px;
+  padding: 40px 20px;
+  background: #050505;
+}
+
+.section-header-glow-cyan {
+  color: #00FFFF;
+  text-shadow: 0 0 15px #00FFFF, 0 0 30px cyan;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.mirror-tubes {
+  flex: 1.5;
+  padding: 20px;
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  will-change: background-position;
+  background: repeating-linear-gradient(90deg, #000 0, #000 5%, #111 10%),
+              repeating-linear-gradient(0deg, rgba(0, 255, 255, 0.3) 0, transparent 5px, rgba(255, 255, 0, 0.3) 10px);
+  background-size: 100% 100%, 100% 100px;
+  animation: flowTubes 2s linear infinite;
+  box-shadow: inset 0 0 50px #000;
+}
+
+@keyframes flowTubes {
+  0%   { background-position: 0 0, 0 0; }
+  100% { background-position: 0 0, 0 100px; }
+}
+
+.review-input-zone {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid cyan;
+  margin-bottom: 10px;
+}
+
+.mirror-display-zone {
+  height: 300px;
+  overflow-y: auto;
+  position: relative;
+  perspective: 600px;
+}
+
+.review-card {
+  background: rgba(0, 255, 255, 0.1);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-left: 3px solid #00FFFF;
+  backdrop-filter: blur(5px);
+  color: #fff;
+}
+
+.rev-submit {
+  background: linear-gradient(90deg, #00FFFF, #ff00ff);
+  border: none;
+  padding: 10px;
+  width: 100%;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.events-container.portal-glow {
+  flex: 2;
+  background: #111;
+  border-left: 6px solid #00FFFF;
+  border-right: 6px solid #FFFF00;
+  box-shadow: inset 20px 0 30px -10px rgba(0, 255, 255, 0.5), inset -20px 0 30px -10px rgba(255, 255, 0, 0.5);
+  padding: 10px;
+  position: relative;
+  border-radius: 10px;
+}
+
+.shortened-box {
+  max-height: 250px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.events-slider {
+  display: flex;
+  overflow-x: auto;
+  gap: 25px;
+  padding: 10px;
+}
+
+.event-circle-frame {
+  flex: 0 0 120px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.event-circle-frame img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  object-fit: cover;
+}
+
+.event-circle-frame:hover img {
+  border-color: #00FFFF;
+  box-shadow: 0 0 20px #00FFFF;
+  transform: scale(1.1);
+}
+
+.scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.scroll-btn.left  { left: 10px; }
+.scroll-btn.right { right: 10px; }
+
+/* ---------- 19. SOCIAL & VIP GRID ---------- */
+.social-vip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+  padding: 0 20px 50px 20px;
+  align-items: stretch;
+  min-height: 500px;
+}
+
+.stories-vault {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #111;
+}
+
+.portal-style-fill {
+  border-left: 6px solid #ff0055;
+  border-right: 6px solid #ffff00;
+  box-shadow: inset 20px 0 30px -10px rgba(255, 0, 85, 0.5), inset -20px 0 30px -10px rgba(255, 255, 0, 0.5);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.sexy-title {
+  color: #ff0055;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px #ff0055;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.stories-scroll-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  padding: 10px;
+  flex: 1;
+}
+
+.story-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.story-item:hover {
+  background: rgba(255, 0, 85, 0.2);
+  transform: translateX(5px);
+}
+
+.story-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(45deg, gold, red);
+}
+
+.story-circle img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #000;
+}
+
+.story-info p { margin: 0; }
+.story-user { font-weight: bold; color: #fff; }
+.story-time { font-size: 0.8rem; color: #aaa; }
+
+/* ---------- 20. LEADERBOARD ---------- */
+.vip-leaderboard {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #111;
+}
+
+.vip-header {
+  background: #ffaa00;
+  color: black;
+  padding: 15px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 1.4rem;
+}
+
+.scrollable-ranks {
+  overflow-y: scroll;
+  padding: 10px;
+  flex: 1;
+}
+
+.rank-link {
+  text-decoration: none;
+  color: white;
+  display: block;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  margin: 5px;
+  border-radius: 10px;
+  background: #222;
+  position: relative;
+  transition: 0.3s;
+}
+
+.rank-item:hover {
+  transform: scale(1.02);
+  background: #333;
+}
+
+.rank-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin: 0 15px;
+}
+
+.rank-1 {
+  background: linear-gradient(90deg, #2a002a, #000);
+  border: 2px solid #ff00ff;
+  box-shadow: 0 0 15px #ff00ff;
+}
+
+.rank-badge-ultra {
+  background: #ff00ff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.reward-crown {
+  position: absolute;
+  right: 20px;
+  font-size: 2rem;
+}
+
+.rank-2 {
+  border-left: 5px solid gold;
+  background: linear-gradient(90deg, #332b00, #000);
+}
+
+.reward-gold-bar-realistic {
+  position: absolute;
+  right: 20px;
+  background: linear-gradient(180deg, #ffd700, #b8860b, #ffffaa, #b8860b);
+  color: #4a3800;
+  padding: 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  border: 1px solid #fff;
+  box-shadow: 0 0 10px gold;
+  margin: 0;
+}
+
+.rank-3 {
+  border-left: 5px solid #00d9ff;
+  background: linear-gradient(90deg, #001a1f, #000);
+}
+
+.reward-diamond-realistic {
+  position: absolute;
+  right: 20px;
+  font-size: 1.5rem;
+  text-shadow: 0 0 10px #00d9ff;
+}
+
+.rank-normal {
+  border-bottom: 1px solid #333;
+}
+
+.mature-star {
+  color: #ffd700;
+  position: absolute;
+  right: 20px;
+  animation: star-glow 2s infinite alternate;
+}
+
+@keyframes star-glow {
+  from { text-shadow: 0 0 2px gold; }
+  to   { text-shadow: 0 0 15px gold; }
+}
+
+.shop-categories {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ---------- 21. MARKET SIMULATION ---------- */
+.market-ticker {
+  background: #000;
+  border: 1px solid #00FFFF;
+  padding: 8px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 20px;
+}
+
+.ticker-track {
+  display: inline-block;
+  animation: ticker-scroll 20s linear infinite;
+}
+
+.ticker-item {
+  color: #00FFFF;
+  font-family: 'Courier New', monospace;
+  margin-right: 50px;
+  font-weight: bold;
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.market-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: white;
+  font-family: 'Courier New', monospace;
+}
+
+.market-table th,
+.market-table td {
+  border: 1px solid #333;
+  padding: 10px;
+  text-align: center;
+}
+
+.market-table th {
+  background: #222;
+  color: #00FFFF;
+}
+
+.market-table td.green { color: #00ff00; }
+.market-table td.red   { color: #ff0000; }

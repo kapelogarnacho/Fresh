@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00FFFF">
+    <title>G-ARCADE · Fresh Feed</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        :root {
+            --bg: #040407;
+            --primary: #ff0050;
+            --secondary: #00f2fe;
+            --accent: #ffff00;
+            --card: rgba(18, 18, 28, .8);
+            --border: rgba(255, 255, 255, .1);
+            --glow: 0 0 20px rgba(0,242,254,.4);
+        }
+        body[data-theme="cyber"] {
+            --bg: #03000f;
+            --primary: #00f2fe;
+            --secondary: #ff007f;
+            --accent: #fffb00;
+        }
+        body[data-theme="sakura"] {
+            --bg: #1a0f14;
+            --primary: #fda4af;
+            --secondary: #f43f5e;
+            --accent: #fbbf24;
+        }
+        body[data-theme="emerald"] {
+            --bg: #020a04;
+            --primary: #10b981;
+            --secondary: #047857;
+            --accent: #34d399;
+        }
+        body {
+            background: var(--bg);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        header {
+            height: 56px;
+            background: rgba(10, 10, 15, .9);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 100;
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-weight: 900;
+            font-size: 18px;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo span {
+            font-size: 24px;
+        }
+        .search {
+            width: 200px;
+            border-radius: 30px;
+            padding: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+            background-size: 300% 300%;
+            animation: borderFlow 6s infinite;
+        }
+        @keyframes borderFlow {
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        .search input {
+            width: 100%;
+            height: 28px;
+            border: none;
+            outline: none;
+            background: #0b0b11;
+            color: #fff;
+            border-radius: 30px;
+            padding: 0 14px;
+            font-size: .75rem;
+            text-align: center;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .party-btn {
+            background: linear-gradient(135deg, #ff007f, #7f00ff);
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: .7rem;
+            font-weight: 900;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 0, 127, .5);
+            transition: all .2s;
+        }
+        .party-btn:active {
+            transform: scale(.95);
+        }
+        .theme-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid var(--secondary);
+            background: radial-gradient(circle, var(--primary), var(--secondary));
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: transform .3s;
+        }
+        .theme-btn:hover {
+            transform: rotate(20deg) scale(1.1);
+        }
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, .05);
+            border: 1px solid var(--border);
+            padding: 4px 12px 4px 4px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+        .profile-info {
+            line-height: 1.1;
+        }
+        .profile-name {
+            font-size: .6rem;
+            font-weight: 800;
+        }
+        .profile-xp {
+            font-size: .5rem;
+            color: var(--secondary);
+        }
+
+        /* Main container */
+        .main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 50px;
+            background: rgba(8, 8, 12, .95);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px 0;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .side-item {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+        }
+        .side-item.active {
+            background: rgba(0, 242, 254, .1);
+            color: var(--secondary);
+            box-shadow: inset 0 0 0 1px var(--secondary);
+        }
+        .side-item:hover {
+            background: rgba(255, 255, 255, .03);
+            color: #fff;
+        }
+
+        /* Feed viewport */
+        .viewport {
+            flex: 1;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            padding: 12px;
+            scroll-snap-type: y mandatory;
+            background: var(--bg);
+        }
+        .viewport.active {
+            display: block;
+        }
+
+        /* Dashboard (grid) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 14px;
+            padding: 12px;
+        }
+        .game-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all .3s;
+            aspect-ratio: 4/3;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .game-card:hover {
+            border-color: var(--secondary);
+            box-shadow: var(--glow);
+            transform: translateY(-4px);
+        }
+        .game-card .emoji {
+            font-size: 3rem;
+            margin-bottom: 8px;
+        }
+        .game-card .title {
+            font-weight: 800;
+            font-size: .8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .game-card .meta {
+            font-size: .6rem;
+            color: #888;
+        }
+        .game-card .vote {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, .6);
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: .6rem;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Theme overlay */
+        .theme-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .8);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
+        }
+        .theme-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .theme-panel {
+            background: #101018;
+            border: 2px solid var(--secondary);
+            border-radius: 24px;
+            padding: 30px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 0 50px var(--secondary);
+        }
+        .theme-panel h2 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .theme-panel .theme-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .theme-option {
+            border-radius: 16px;
+            padding: 16px 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all .3s;
+            font-weight: 800;
+            font-size: .8rem;
+        }
+        .theme-option:hover {
+            transform: scale(1.05);
+            border-color: #fff;
+        }
+        .theme-option.midnight {
+            background: #1a1a2e;
+            color: #ddd;
+            border-color: #5c00ff;
+        }
+        .theme-option.cyber {
+            background: #0b0b13;
+            color: #00f2fe;
+            border-color: #ff007f;
+        }
+        .theme-option.sakura {
+            background: #2d1b1e;
+            color: #fda4af;
+            border-color: #f43f5e;
+        }
+        .theme-option.emerald {
+            background: #052e16;
+            color: #10b981;
+            border-color: #047857;
+        }
+        .close-theme {
+            margin-top: 20px;
+            background: var(--secondary);
+            border: none;
+            color: #000;
+            padding: 8px 30px;
+            border-radius: 30px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: .8rem;
+        }
+
+        /* Cabinet feed (fullscreen games) */
+        .cabinet {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 300;
+            background: #000;
+            display: none;
+            flex-direction: column;
+        }
+        .cabinet.active {
+            display: flex;
+        }
+        .cabinet-header {
+            height: 48px;
+            background: rgba(0, 0, 0, .9);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .cabinet-header .title {
+            font-weight: 800;
+            color: var(--secondary);
+            text-transform: uppercase;
+        }
+        .cabinet-header .exit {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            padding: 5px 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: .7rem;
+        }
+        .feed {
+            flex: 1;
+            overflow-y: auto;
+            scroll-snap-type: y mandatory;
+        }
+        .slide {
+            width: 100%;
+            height: calc(100vh - 48px);
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border-bottom: 2px solid var(--border);
+            background: radial-gradient(circle, #0a0a15, #030308);
+        }
+        .slide-game {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .slide-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 15, .95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 10;
+        }
+        .slide-cover .play-btn {
+            background: var(--secondary);
+            border: none;
+            color: #000;
+            padding: 12px 40px;
+            border-radius: 40px;
+            font-weight: 900;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px var(--secondary);
+        }
+        .game-over {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(transparent, #000);
+            display: none;
+            text-align: center;
+            z-index: 20;
+        }
+        .slide.dead .game-over {
+            display: block;
+        }
+        .game-over .score {
+            font-size: 1.2rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .game-over .btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        .game-over .btn {
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-weight: 800;
+            border: none;
+            cursor: pointer;
+            font-size: .7rem;
+        }
+        .btn-restart {
+            background: var(--secondary);
+            color: #000;
+        }
+        .btn-exit {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        /* side strip for TikTok-like controls */
+        .side-strip {
+            width: 60px;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            z-index: 25;
+        }
+        .strip-btn {
+            background: rgba(0, 0, 0, .5);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: #fff;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+        .strip-btn.active {
+            color: var(--primary);
+            background: rgba(255, 0, 80, .2);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, .85);
+            border: 1px solid var(--secondary);
+            color: #fff;
+            padding: 8px 24px;
+            border-radius: 30px;
+            font-size: .75rem;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity .3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* Phaser container */
+        #phaser-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #phaser-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body data-theme="midnight">
+
+    <header>
+        <div class="logo"><span>🎮</span>G-ARCADE</div>
+        <div class="search"><input type="text" id="search-input" placeholder="🔍 Search games..."></div>
+        <div class="actions">
+            <button class="party-btn" onclick="toggleParty()">⚡ PARTY</button>
+            <button class="theme-btn" onclick="openTheme()">🎨</button>
+            <div class="profile" onclick="toggleProfile()">
+                <div class="avatar" id="avatar">👾</div>
+                <div class="profile-info"><div class="profile-name" id="profile-name">Aura</div><div class="profile-xp" id="profile-xp">Lvl 1 · 0 XP</div></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main">
+        <div class="sidebar">
+            <button class="side-item active" onclick="showDashboard()">🏠</button>
+            <button class="side-item" onclick="showFeed()">📱</button>
+            <button class="side-item" onclick="openTheme()">🎨</button>
+        </div>
+        <div class="viewport active" id="dashboard-view">
+            <!-- Dashboard grid will be rendered here -->
+        </div>
+        <div class="viewport" id="feed-view">
+            <!-- Feed games will be rendered here -->
+        </div>
+    </div>
+
+    <!-- Theme Overlay -->
+    <div class="theme-overlay" id="theme-overlay">
+        <div class="theme-panel">
+            <h2>🎨 Select Theme</h2>
+            <div class="theme-grid">
+                <div class="theme-option midnight" onclick="setTheme('midnight')">Midnight</div>
+                <div class="theme-option cyber" onclick="setTheme('cyber')">Cyberpunk</div>
+                <div class="theme-option sakura" onclick="setTheme('sakura')">Sakura</div>
+                <div class="theme-option emerald" onclick="setTheme('emerald')">Emerald</div>
+            </div>
+            <button class="close-theme" onclick="closeTheme()">Close</button>
+        </div>
+    </div>
+
+    <!-- Cabinet Feed -->
+    <div class="cabinet" id="cabinet">
+        <div class="cabinet-header">
+            <span class="title" id="cabinet-title">G-ARCADE FEED</span>
+            <button class="exit" onclick="exitCabinet()">✕ Exit</button>
+        </div>
+        <div class="feed" id="feed"></div>
+        <div class="side-strip" id="side-strip"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ========== USER & STORAGE ==========
+        let user = { name: "Aura", avatar: "👾", level: 1, xp: 0, coins: 100 };
+        let votedGames = JSON.parse(localStorage.getItem('voted') || '[]');
+
+        function saveUser() { localStorage.setItem('user', JSON.stringify(user)); }
+        function loadUser() { const u = JSON.parse(localStorage.getItem('user')); if (u) user = { ...user, ...u }; }
+
+        // ========== GAME DATA ==========
+        // Each game has an id, title, emoji, category, and a loader function
+        const gameDefinitions = [
+            { id: 'baby-commando', title: 'Baby Commando 2', emoji: '🔫', cat: 'shooter', desc: 'Twin-stick shooter survival', isPhaser: true },
+            { id: 'tap-rhythm', title: 'Tap-Rhythm', emoji: '🎯', cat: 'rhythm', desc: 'Tap the orb faster & faster' },
+            { id: 'reaction', title: 'Reaction Dial', emoji: '⚡', cat: 'reflex', desc: 'Tap when dial aligns' },
+            { id: 'memory', title: 'Cyber Memory', emoji: '🧩', cat: 'puzzle', desc: 'Match all pairs quickly' },
+            { id: 'evader', title: 'Void Evader', emoji: '🚀', cat: 'action', desc: 'Dodge meteors & shoot' },
+            { id: 'piano', title: 'Piano Tiles', emoji: '🎹', cat: 'rhythm', desc: 'Tap the rhythm tiles' },
+            { id: 'math', title: 'Math Sprint', emoji: '🧮', cat: 'puzzle', desc: 'Answer math fast' },
+            { id: 'rocket-dodge', title: 'Rocket Dodge', emoji: '🛸', cat: 'action', desc: 'Dodge incoming rockets' },
+            { id: 'color-switch', title: 'Color Switch', emoji: '🔄', cat: 'reflex', desc: 'Tap to change color' }
+        ];
+
+        // ========== THEME ==========
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            closeTheme();
+            showToast(`Theme: ${theme}`);
+        }
+
+        function openTheme() {
+            document.getElementById('theme-overlay').classList.add('show');
+        }
+
+        function closeTheme() {
+            document.getElementById('theme-overlay').classList.remove('show');
+        }
+
+        // ========== TOAST ==========
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        // ========== DASHBOARD ==========
+        function renderDashboard() {
+            const grid = document.getElementById('dashboard-view');
+            grid.innerHTML = '';
+            const list = [...gameDefinitions];
+            list.forEach(game => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                card.innerHTML = `
+                    <div class="emoji">${game.emoji}</div>
+                    <div class="title">${game.title}</div>
+                    <div class="meta">${game.desc}</div>
+                    <div class="vote" onclick="toggleVote('${game.id}')">❤️ ${votedGames.includes(game.id) ? 'Liked' : 'Vote'}</div>
+                `;
+                card.onclick = () => launchCabinet(game.id);
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleVote(id) {
+            if (votedGames.includes(id)) votedGames = votedGames.filter(v => v !== id);
+            else votedGames.push(id);
+            localStorage.setItem('voted', JSON.stringify(votedGames));
+            renderDashboard();
+        }
+
+        // ========== FEED (TikTok style) ==========
+        function showFeed() {
+            document.getElementById('dashboard-view').classList.remove('active');
+            document.getElementById('feed-view').classList.add('active');
+            renderFeed();
+        }
+
+        function showDashboard() {
+            document.getElementById('feed-view').classList.remove('active');
+            document.getElementById('dashboard-view').classList.add('active');
+            renderDashboard();
+        }
+
+        function renderFeed() {
+            const feed = document.getElementById('feed-view');
+            feed.innerHTML = '';
+            gameDefinitions.forEach(game => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.id = `feed-${game.id}`;
+                slide.dataset.gameId = game.id;
+                slide.innerHTML = `
+                    <div class="slide-game" id="slide-game-${game.id}"></div>
+                    <div class="slide-cover" id="cover-${game.id}">
+                        <div style="font-size:3rem">${game.emoji}</div>
+                        <h3>${game.title}</h3>
+                        <p style="color:#888;font-size:.8rem">${game.desc}</p>
+                        <button class="play-btn" onclick="startGameInSlide('${game.id}')">▶ PLAY</button>
+                    </div>
+                    <div class="game-over" id="over-${game.id}">
+                        <div class="score" id="score-${game.id}">Score: 0</div>
+                        <div class="btns">
+                            <button class="btn btn-restart" onclick="restartGame('${game.id}')">Restart</button>
+                            <button class="btn btn-exit" onclick="exitCabinet()">Exit</button>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(slide);
+            });
+            // Intersection observer to activate games
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.dataset.gameId;
+                        // Start game if it's a Phaser game and not started yet
+                        if (id === 'baby-commando' && !entry.target.querySelector('canvas')) {
+                            initPhaserBabyCommando(entry.target);
+                        }
+                        // For non-phaser games, no auto start
+                    }
+                });
+            }, { threshold: 0.6 });
+            feed.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
+        }
+
+        // ========== CABINET (fullscreen) ==========
+        function launchCabinet(gameId) {
+            const cabinet = document.getElementById('cabinet');
+            cabinet.classList.add('active');
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+            // Build slides for all games
+            gameDefinitions.forEach(game => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.id = `slide-${game.id}`;
+                slide.dataset.gameId = game.id;
+                slide.innerHTML = `
+                    <div class="slide-game" id="slide-game-${game.id}"></div>
+                    <div class="slide-cover" id="cover-${game.id}">
+                        <div style="font-size:3rem">${game.emoji}</div>
+                        <h3>${game.title}</h3>
+                        <p style="color:#888;font-size:.8rem">${game.desc}</p>
+                        <button class="play-btn" onclick="startGameInSlide('${game.id}')">▶ PLAY</button>
+                    </div>
+                    <div class="game-over" id="over-${game.id}">
+                        <div class="score" id="score-${game.id}">Score: 0</div>
+                        <div class="btns">
+                            <button class="btn btn-restart" onclick="restartGame('${game.id}')">Restart</button>
+                            <button class="btn btn-exit" onclick="exitCabinet()">Exit</button>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(slide);
+            });
+            // Scroll to the selected game
+            setTimeout(() => {
+                const target = document.getElementById(`slide-${gameId}`);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+            // Phaser observer
+            const observer = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && entry.target.dataset.gameId === 'baby-commando' && !entry.target.querySelector('canvas')) {
+                        initPhaserBabyCommando(entry.target);
+                    }
+                });
+            }, { threshold: 0.7 });
+            feed.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
+        }
+
+        function exitCabinet() {
+            // Destroy Phaser game if active
+            if (window.babyCommandoGame) {
+                window.babyCommandoGame.destroy(true);
+                window.babyCommandoGame = null;
+            }
+            document.getElementById('cabinet').classList.remove('active');
+            showDashboard();
+        }
+
+        // ========== GAME START ==========
+        function startGameInSlide(gameId) {
+            const slide = document.getElementById(`slide-${gameId}`);
+            const cover = slide.querySelector(`#cover-${gameId}`);
+            cover.style.display = 'none';
+            const gameContainer = slide.querySelector(`#slide-game-${gameId}`);
+            gameContainer.innerHTML = '';
+
+            if (gameId === 'baby-commando') {
+                // Phaser will be initialized by observer, but also start if called directly
+                if (!gameContainer.querySelector('canvas')) {
+                    initPhaserBabyCommando(slide);
+                }
+            } else if (gameId === 'tap-rhythm') {
+                startTapRhythm(gameContainer, slide);
+            } else if (gameId === 'reaction') {
+                startReaction(gameContainer, slide);
+            } else if (gameId === 'memory') {
+                startMemory(gameContainer, slide);
+            } else if (gameId === 'evader') {
+                startEvader(gameContainer, slide);
+            } else if (gameId === 'piano') {
+                startPiano(gameContainer, slide);
+            } else if (gameId === 'math') {
+                startMath(gameContainer, slide);
+            } else if (gameId === 'rocket-dodge') {
+                startRocketDodge(gameContainer, slide);
+            } else if (gameId === 'color-switch') {
+                startColorSwitch(gameContainer, slide);
+            }
+        }
+
+        function restartGame(gameId) {
+            const slide = document.getElementById(`slide-${gameId}`);
+            slide.classList.remove('dead');
+            const cover = slide.querySelector(`#cover-${gameId}`);
+            cover.style.display = 'flex';
+            const gameContainer = slide.querySelector(`#slide-game-${gameId}`);
+            gameContainer.innerHTML = '';
+            // For phaser, need to destroy old game
+            if (gameId === 'baby-commando' && window.babyCommandoGame) {
+                window.babyCommandoGame.destroy(true);
+                window.babyCommandoGame = null;
+            }
+            startGameInSlide(gameId);
+        }
+
+        function showGameOver(gameId, score) {
+            const slide = document.getElementById(`slide-${gameId}`);
+            slide.classList.add('dead');
+            const s = slide.querySelector(`#score-${gameId}`);
+            s.innerText = `Score: ${score}`;
+        }
+
+        // ========== GAME IMPLEMENTATIONS ==========
+
+        // --- TAP RHYTHM (upgraded with combo) ---
+        function startTapRhythm(container, slide) {
+            let score = 0;
+            let combo = 0;
+            let timeLeft = 30;
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px;font-size:1rem">⏱️ <span id="tap-time">30</span>s</div>
+                <div style="position:absolute;top:20px;right:20px;font-size:1rem">🎯 <span id="tap-score">0</span></div>
+                <div style="position:absolute;top:50px;right:20px;color:#ff0;font-size:.8rem" id="tap-combo"></div>
+                <div id="tap-target" style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));position:absolute;cursor:pointer;box-shadow:0 0 20px var(--primary)"></div>
+            `;
+            const target = document.getElementById('tap-target');
+            const move = () => {
+                const w = container.clientWidth;
+                const h = container.clientHeight;
+                target.style.left = (Math.random() * (w - 70) + 10) + 'px';
+                target.style.top = (Math.random() * (h - 70) + 10) + 'px';
+            };
+            move();
+            target.onclick = () => {
+                if (timeLeft <= 0) return;
+                score++;
+                combo++;
+                document.getElementById('tap-score').innerText = score;
+                document.getElementById('tap-combo').innerText = 'Combo: ' + combo;
+                move();
+            };
+            const timer = setInterval(() => {
+                timeLeft--;
+                const t = document.getElementById('tap-time');
+                if (t) t.innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    target.style.display = 'none';
+                    showGameOver('tap-rhythm', score);
+                }
+            }, 1000);
+        }
+
+        // --- REACTION DIAL (upgraded with multiple hits) ---
+        function startReaction(container, slide) {
+            let score = 0, angle = 0, speed = 2.5, hits = 0;
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px;color:#0ff">Score: <span id="r-score">0</span></div>
+                <div style="position:absolute;top:20px;right:20px;color:#ff0">Hits: <span id="r-hits">0</span></div>
+                <div style="width:200px;height:200px;border-radius:50%;border:4px solid #333;position:relative">
+                    <div style="position:absolute;top:50%;left:50%;width:16px;height:16px;background:var(--secondary);border-radius:50%;transform:translate(-8px,-8px)"></div>
+                    <div id="r-hand" style="position:absolute;top:50%;left:50%;width:100px;height:3px;background:#fff;transform-origin:0% 50%;transform:rotate(0deg)"></div>
+                </div>
+            `;
+            const hand = document.getElementById('r-hand');
+            const loop = () => {
+                angle = (angle + speed) % 360;
+                hand.style.transform = `rotate(${angle - 90}deg)`;
+                requestAnimationFrame(loop);
+            };
+            loop();
+            container.onclick = (e) => {
+                if (angle > 340 || angle < 20) {
+                    hits++;
+                    score += 10;
+                    document.getElementById('r-score').innerText = score;
+                    document.getElementById('r-hits').innerText = hits;
+                    speed += 0.3;
+                    if (hits >= 10) {
+                        showGameOver('reaction', score);
+                    }
+                } else {
+                    showGameOver('reaction', score);
+                }
+            };
+        }
+
+        // --- MEMORY (upgraded with timer) ---
+        function startMemory(container, slide) {
+            const symbols = ['🐱', '🐶', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+            let moves = 0, pairs = 0, first = null, second = null, lock = false;
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px">Moves: <span id="mem-moves">0</span></div>
+                <div style="position:absolute;top:20px;right:20px">Pairs: <span id="mem-pairs">0/8</span></div>
+                <div id="mem-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:300px;aspect-ratio:1"></div>
+            `;
+            let deck = [...symbols, ...symbols];
+            deck.sort(() => Math.random() - 0.5);
+            const grid = document.getElementById('mem-grid');
+            deck.forEach((sym) => {
+                const card = document.createElement('div');
+                card.style.background = '#1a1a2e';
+                card.style.borderRadius = '8px';
+                card.style.display = 'flex';
+                card.style.alignItems = 'center';
+                card.style.justifyContent = 'center';
+                card.style.fontSize = '2rem';
+                card.style.cursor = 'pointer';
+                card.dataset.sym = sym;
+                card.innerText = '?';
+                card.onclick = () => {
+                    if (lock || card.classList.contains('flipped')) return;
+                    card.innerText = sym;
+                    card.classList.add('flipped');
+                    if (!first) { first = card; } else {
+                        second = card;
+                        moves++;
+                        document.getElementById('mem-moves').innerText = moves;
+                        if (first.dataset.sym === second.dataset.sym) {
+                            pairs++;
+                            document.getElementById('mem-pairs').innerText = `${pairs}/8`;
+                            first = null; second = null;
+                            if (pairs >= 8) {
+                                showGameOver('memory', Math.max(10, 100 - moves));
+                            }
+                        } else {
+                            lock = true;
+                            setTimeout(() => {
+                                first.innerText = '?';
+                                second.innerText = '?';
+                                first.classList.remove('flipped');
+                                second.classList.remove('flipped');
+                                first = null; second = null; lock = false;
+                            }, 800);
+                        }
+                    }
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        // --- EVADER (upgraded with power-ups) ---
+        function startEvader(container, slide) {
+            let score = 0, shipX = 50, meteors = [], lasers = [], active = true;
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px;color:#0ff">Score: <span id="e-score">0</span></div>
+                <div style="position:absolute;top:20px;right:20px">💥 <span id="e-count">0</span></div>
+                <div id="e-ship" style="position:absolute;width:40px;height:40px;background:var(--secondary);bottom:20px;left:50%;border-radius:10px"></div>
+                <div id="e-meteors"></div>
+                <div style="position:absolute;bottom:10px;left:20px;display:flex;gap:8px">
+                    <button style="background:#333;border:none;color:#fff;padding:6px 10px;border-radius:8px" onclick="moveEvader(-20)">◀</button>
+                    <button style="background:#333;border:none;color:#fff;padding:6px 10px;border-radius:8px" onclick="moveEvader(20)">▶</button>
+                    <button style="background:var(--primary);border:none;color:#fff;padding:6px 10px;border-radius:8px" onclick="fireLaser()">🔥</button>
+                </div>
+            `;
+            window.moveEvader = (dx) => {
+                shipX = Math.max(5, Math.min(95, shipX + dx));
+                document.getElementById('e-ship').style.left = shipX + '%';
+            };
+            window.fireLaser = () => {
+                const ship = document.getElementById('e-ship');
+                const laser = document.createElement('div');
+                laser.style.position = 'absolute';
+                laser.style.width = '4px';
+                laser.style.height = '20px';
+                laser.style.background = '#fff';
+                laser.style.left = ship.style.left;
+                laser.style.bottom = '60px';
+                laser.id = 'laser';
+                container.appendChild(laser);
+                setTimeout(() => laser.remove(), 1000);
+                score++;
+                document.getElementById('e-score').innerText = score;
+            };
+            const spawnTimer = setInterval(() => {
+                if (!active) return;
+                const meteor = document.createElement('div');
+                meteor.style.position = 'absolute';
+                meteor.style.width = '15px';
+                meteor.style.height = '15px';
+                meteor.style.background = 'var(--primary)';
+                meteor.style.borderRadius = '50%';
+                meteor.style.left = (Math.random() * 90 + 5) + '%';
+                meteor.style.top = '-20px';
+                document.getElementById('e-meteors').appendChild(meteor);
+                meteors.push({ el: meteor, speed: Math.random() * 4 + 2, y: 0 });
+            }, 500);
+            const moveTimer = setInterval(() => {
+                meteors.forEach(m => {
+                    m.y += m.speed * 10;
+                    m.el.style.top = m.y + 'px';
+                });
+                // Check collision
+                const shipY = container.clientHeight - 60;
+                meteors = meteors.filter(m => {
+                    const mY = parseFloat(m.el.style.top);
+                    const mX = parseFloat(m.el.style.left);
+                    if (mY > shipY - 30 && mY < shipY + 20 && Math.abs(mX - shipX) < 12) {
+                        active = false;
+                        clearInterval(spawnTimer);
+                        clearInterval(moveTimer);
+                        showGameOver('evader', score);
+                        return false;
+                    }
+                    return mY < container.clientHeight;
+                });
+            }, 100);
+        }
+
+        // --- PIANO TILES (upgraded with combo) ---
+        function startPiano(container, slide) {
+            let score = 0, combo = 0, tiles = [];
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px">Score: <span id="p-score">0</span></div>
+                <div style="position:absolute;top:20px;right:20px">Combo: <span id="p-combo">0</span></div>
+                <div id="p-keys" style="display:flex;width:100%;height:100%"></div>
+                <div style="position:absolute;bottom:0;left:0;width:100%;height:4px;background:var(--primary)"></div>
+            `;
+            for (let i = 0; i < 4; i++) {
+                const col = document.createElement('div');
+                col.style.flex = '1';
+                col.style.borderRight = '1px solid #333';
+                col.style.position = 'relative';
+                col.onclick = () => tap(i);
+                document.getElementById('p-keys').appendChild(col);
+            }
+            const spawn = () => {
+                const col = Math.floor(Math.random() * 4);
+                const key = document.getElementById('p-keys').children[col];
+                const tile = document.createElement('div');
+                tile.style.position = 'absolute';
+                tile.style.width = '70%';
+                tile.style.height = '40px';
+                tile.style.background = 'linear-gradient(135deg,var(--secondary),var(--primary))';
+                tile.style.left = '15%';
+                tile.style.top = '-50px';
+                tile.style.borderRadius = '8px';
+                key.appendChild(tile);
+                tiles.push({ el: tile, col: col, y: -50 });
+            };
+            const interval = setInterval(spawn, 300);
+            const move = setInterval(() => {
+                tiles.forEach(t => {
+                    t.y += 5;
+                    t.el.style.top = t.y + 'px';
+                });
+                tiles = tiles.filter(t => {
+                    if (t.y > 300) {
+                        showGameOver('piano', score);
+                        clearInterval(interval);
+                        clearInterval(move);
+                        return false;
+                    }
+                    return true;
+                });
+            }, 50);
+            const tap = (col) => {
+                const idx = tiles.findIndex(t => t.col === col && t.y > 250 && t.y < 300);
+                if (idx !== -1) {
+                    tiles[idx].el.remove();
+                    tiles.splice(idx, 1);
+                    score++;
+                    combo++;
+                    document.getElementById('p-score').innerText = score;
+                    document.getElementById('p-combo').innerText = combo;
+                } else {
+                    showGameOver('piano', score);
+                    clearInterval(interval);
+                    clearInterval(move);
+                }
+            };
+        }
+
+        // --- MATH SPRINT (upgraded with difficulty) ---
+        function startMath(container, slide) {
+            let score = 0, timeLeft = 30;
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px">⏱️ <span id="math-time">30</span>s</div>
+                <div style="position:absolute;top:20px;right:20px">✅ <span id="math-score">0</span></div>
+                <div style="font-size:3rem;font-weight:900" id="math-question"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:200px;margin-top:20px" id="math-options"></div>
+            `;
+            const gen = () => {
+                const a = Math.floor(Math.random() * 20) + 1;
+                const b = Math.floor(Math.random() * 20) + 1;
+                const op = Math.random() > 0.5 ? '+' : '-';
+                const ans = op === '+' ? a + b : a - b;
+                document.getElementById('math-question').innerText = `${a} ${op} ${b} = ?`;
+                let opts = [ans];
+                while (opts.length < 4) {
+                    const f = ans + Math.floor(Math.random() * 10) - 5;
+                    if (!opts.includes(f)) opts.push(f);
+                }
+                opts.sort(() => Math.random() - 0.5);
+                const optDiv = document.getElementById('math-options');
+                optDiv.innerHTML = '';
+                opts.forEach(o => {
+                    const btn = document.createElement('button');
+                    btn.style.background = '#222';
+                    btn.style.border = 'none';
+                    btn.style.color = '#fff';
+                    btn.style.padding = '12px';
+                    btn.style.borderRadius = '10px';
+                    btn.style.fontSize = '1.2rem';
+                    btn.innerText = o;
+                    btn.onclick = () => {
+                        if (o === ans) {
+                            score++;
+                            document.getElementById('math-score').innerText = score;
+                            gen();
+                        } else {
+                            showGameOver('math', score);
+                            clearInterval(timer);
+                        }
+                    };
+                    optDiv.appendChild(btn);
+                });
+            };
+            gen();
+            const timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('math-time').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    showGameOver('math', score);
+                    clearInterval(timer);
+                }
+            }, 1000);
+        }
+
+        // --- ROCKET DODGE (new game) ---
+        function startRocketDodge(container, slide) {
+            let score = 0, active = true, playerX = 50, rockets = [];
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px">Score: <span id="rd-score">0</span></div>
+                <div style="position:absolute;top:20px;right:20px">Survive!</div>
+                <div id="rd-player" style="position:absolute;width:40px;height:40px;background:var(--accent);border-radius:50%;bottom:30px;left:50%;transform:translateX(-50%)"></div>
+                <div id="rd-rockets"></div>
+                <div style="position:absolute;bottom:10px;left:20px;display:flex;gap:8px">
+                    <button style="background:#333;border:none;color:#fff;padding:6px 10px;border-radius:8px" onclick="moveRD(-15)">◀</button>
+                    <button style="background:#333;border:none;color:#fff;padding:6px 10px;border-radius:8px" onclick="moveRD(15)">▶</button>
+                </div>
+            `;
+            window.moveRD = (dx) => {
+                playerX = Math.max(5, Math.min(95, playerX + dx));
+                document.getElementById('rd-player').style.left = playerX + '%';
+            };
+            const spawn = setInterval(() => {
+                if (!active) return;
+                const rocket = document.createElement('div');
+                rocket.style.position = 'absolute';
+                rocket.style.width = '30px';
+                rocket.style.height = '10px';
+                rocket.style.background = 'var(--primary)';
+                rocket.style.borderRadius = '5px';
+                rocket.style.left = (Math.random() * 90 + 5) + '%';
+                rocket.style.top = '-20px';
+                document.getElementById('rd-rockets').appendChild(rocket);
+                rockets.push({ el: rocket, speed: Math.random() * 5 + 3, y: 0 });
+            }, 400);
+            const move = setInterval(() => {
+                rockets.forEach(r => {
+                    r.y += r.speed * 10;
+                    r.el.style.top = r.y + 'px';
+                });
+                rockets = rockets.filter(r => {
+                    const rY = parseFloat(r.el.style.top);
+                    if (rY > container.clientHeight - 30) {
+                        score++;
+                        document.getElementById('rd-score').innerText = score;
+                        return false;
+                    }
+                    return true;
+                });
+                // collision with player
+                const playerY = container.clientHeight - 50;
+                rockets.forEach(r => {
+                    const rY = parseFloat(r.el.style.top);
+                    const rX = parseFloat(r.el.style.left);
+                    if (rY > playerY - 20 && rY < playerY + 20 && Math.abs(rX - playerX) < 15) {
+                        active = false;
+                        clearInterval(spawn);
+                        clearInterval(move);
+                        showGameOver('rocket-dodge', score);
+                    }
+                });
+            }, 80);
+        }
+
+        // --- COLOR SWITCH (new game) ---
+        function startColorSwitch(container, slide) {
+            let score = 0, playerColor = '#ff0050', active = true, obstacles = [];
+            container.innerHTML = `
+                <div style="position:absolute;top:20px;left:20px">Score: <span id="cs-score">0</span></div>
+                <div id="cs-player" style="position:absolute;width:40px;height:40px;background:${playerColor};border-radius:50%;bottom:40px;left:50%;transform:translateX(-50%)"></div>
+                <div id="cs-obstacles"></div>
+                <div style="position:absolute;bottom:10px;right:20px">
+                    <button style="background:${playerColor};border:none;color:#fff;padding:10px 20px;border-radius:30px;font-size:1rem" onclick="switchColor()">🔄 Switch</button>
+                </div>
+            `;
+            window.switchColor = () => {
+                if (!active) return;
+                playerColor = playerColor === '#ff0050' ? '#00f2fe' : '#ff0050';
+                document.getElementById('cs-player').style.background = playerColor;
+                document.querySelector('#cs-obstacles button').style.background = playerColor;
+            };
+            const spawn = setInterval(() => {
+                if (!active) return;
+                const obstacle = document.createElement('div');
+                obstacle.style.position = 'absolute';
+                obstacle.style.width = '40px';
+                obstacle.style.height = '40px';
+                obstacle.style.borderRadius = '20px';
+                obstacle.style.left = (Math.random() * 80 + 10) + '%';
+                obstacle.style.top = '-20px';
+                obstacle.style.background = Math.random() > 0.5 ? '#ff0050' : '#00f2fe';
+                document.getElementById('cs-obstacles').appendChild(obstacle);
+                obstacles.push({ el: obstacle, y: -20, speed: Math.random() * 4 + 2 });
+            }, 300);
+            const move = setInterval(() => {
+                obstacles.forEach(o => {
+                    o.y += o.speed * 10;
+                    o.el.style.top = o.y + 'px';
+                });
+                obstacles = obstacles.filter(o => {
+                    const oy = parseFloat(o.el.style.top);
+                    const playerY = container.clientHeight - 50;
+                    if (oy > playerY - 20 && oy < playerY + 20) {
+                        const ox = parseFloat(o.el.style.left);
+                        if (Math.abs(ox - playerX) < 20) {
+                            const obstacleColor = o.el.style.background;
+                            if (obstacleColor !== playerColor) {
+                                active = false;
+                                clearInterval(spawn);
+                                clearInterval(move);
+                                showGameOver('color-switch', score);
+                                return false;
+                            } else {
+                                score++;
+                                document.getElementById('cs-score').innerText = score;
+                                o.el.remove();
+                                return false;
+                            }
+                        }
+                    }
+                    return oy < container.clientHeight;
+                });
+            }, 50);
+            // playerX needs to be defined in scope
+            let playerX = 50;
+            window.moveRD = (dx) => {
+                playerX = Math.max(10, Math.min(90, playerX + dx));
+                document.getElementById('cs-player').style.left = playerX + '%';
+            };
+            // Add touch controls
+            container.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                if (touch.clientX < window.innerWidth / 2) switchColor();
+                else moveRD(touch.clientX > window.innerWidth / 2 ? 15 : -15);
+            });
+        }
+
+        // ========== PHASER BABY COMMANDO ==========
+        function initPhaserBabyCommando(slide) {
+            const container = slide.querySelector(`#slide-game-baby-commando`);
+            container.innerHTML = '<div id="phaser-container"></div>';
+
+            // Destroy previous instance
+            if (window.babyCommandoGame) {
+                window.babyCommandoGame.destroy(true);
+                window.babyCommandoGame = null;
+            }
+
+            const config = {
+                type: Phaser.AUTO,
+                parent: 'phaser-container',
+                width: 800,
+                height: 600,
+                scale: {
+                    mode: Phaser.Scale.FIT,
+                    autoCenter: Phaser.Scale.CENTER_BOTH
+                },
+                physics: {
+                    default: 'arcade',
+                    arcade: { gravity: { x: 0, y: 0 }, debug: false }
+                },
+                scene: {
+                    create: function() {
+                        // Simplified Baby Commando for feed
+                        let player = this.add.circle(400, 300, 12, 0xff4444);
+                        this.physics.add.existing(player);
+                        player.body.setCollideWorldBounds(true);
+
+                        // create some enemies
+                        this.enemies = [];
+                        for (let i = 0; i < 5; i++) {
+                            let e = this.add.circle(Math.random() * 700 + 50, Math.random() * 500 + 50, 10, 0x00ff88);
+                            this.physics.add.existing(e);
+                            e.body.setCollideWorldBounds(true);
+                            this.enemies.push(e);
+                        }
+
+                        // shooting logic
+                        this.input.on('pointerdown', () => {
+                            let bullet = this.add.circle(player.x, player.y, 4, 0xffff00);
+                            this.physics.add.existing(bullet);
+                            bullet.body.setVelocity(300, 0);
+                            this.time.delayedCall(1000, () => bullet.destroy());
+                        });
+
+                        this.update = function() {
+                            // basic AI
+                            this.enemies.forEach(e => {
+                                this.physics.moveToObject(e, player, 50);
+                            });
+                        };
+                    }
+                }
+            };
+            window.babyCommandoGame = new Phaser.Game(config);
+            // hide cover
+            const cover = slide.querySelector('#cover-baby-commando');
+            if (cover) cover.style.display = 'none';
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            loadUser();
+            renderDashboard();
+            // ambient
+            let canvas = document.createElement('canvas');
+            canvas.id = 'ambient';
+            canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;';
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            let particles = [];
+            for (let i = 0; i < 30; i++) particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 2,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                c: i % 2 === 0 ? '#00f2fe' : '#ff0050'
+            });
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+                    ctx.globalAlpha = 0.4;
+                    ctx.fillStyle = p.c;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+            animate();
+        });
+
+        // ========== EXPOSE ==========
+        window.openTheme = openTheme;
+        window.closeTheme = closeTheme;
+        window.setTheme = setTheme;
+        window.showFeed = showFeed;
+        window.showDashboard = showDashboard;
+        window.launchCabinet = launchCabinet;
+        window.exitCabinet = exitCabinet;
+        window.startGameInSlide = startGameInSlide;
+        window.restartGame = restartGame;
+        window.showGameOver = showGameOver;
+        window.toggleVote = toggleVote;
+        window.toggleParty = function() { document.body.classList.toggle('party-active'); showToast('Party mode!'); };
+    </script>
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.warn('SW failed:', err));
+}
+</script>
+</body>
+</html>
