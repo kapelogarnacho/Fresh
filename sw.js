@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fresh-ent-cache-v1';
+const CACHE_NAME = 'fresh-ent-cache-v2';
 const urlsToCache = [
   'index.html',
   'villagehub.html',
